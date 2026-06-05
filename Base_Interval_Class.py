@@ -82,4 +82,18 @@ class Interval:
         if self.is_empty or other.is_empty:
             return False
         return max(other.lo, self.lo) <= min(self.hi, other.hi)
+
+    def intersection(self, other):
+        if self.is_empty or other.is_empty:
+            return Interval.empty()
+        return Interval(max(self.lo, other.lo), min(self.hi, other.hi)
+    def hull(self, other):
+        if self.is_empty:
+            return other
+        if other.is_empty:
+            return self
+
+        return Interval(min(self.lo, other.lo), max(self.hi, other.hi)
+
+
     
