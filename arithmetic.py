@@ -7,3 +7,35 @@ from gmpy2 import mpfr
 # only combine endpoints using rounding.py
 # always return Interval
 
+def add(x: Interval, y:Interval) -> Interval:
+  if x.is_empty or y.is_empty:
+    return Interval.empty()
+  lo = add_down(x.lo, y.lo)
+  hi = add_up(x.hi, y.hi)
+  return Interval(lo, hi)
+
+def subtract(x: Interval, y:Interval) -> Interval:
+  if x.is_empty or y.is_empty:
+    return Interval.empty()
+  lo = sub_down(x.lo, y.lo)
+  hi = sub_down(x.hi, y.hi)
+  return Interval(lo, hi)
+
+def multiply(x: Interval, y:Interval) -> Interval:
+  if x.is_empty or y.is_empty:
+    return Interval.empty()
+  p1 = mul_down(x.lo, y.lo)
+  p2 = mul_down(x.lo, y.hi)
+  p3 = mul_down(x.hi, y.lo)
+  p4 = mul_down(x.hi, y.hi)
+  
+  lo = min(p1, p2, p3, p4)
+
+  q1 = mul_up(x.lo, y.lo)
+  q2 = mul_up(x.lo, y.hi)
+  q3 = mul_up(x.hi, y.lo)
+  q4 = mul_up(x.hi, y.hi)
+  
+  hi = max(q1, q2, q3, q4)
+
+  return Interval(lo, hi)
