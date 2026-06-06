@@ -1,6 +1,5 @@
 from .interval import Interval
-from .rounding import add_down, add_up, sub_down, sub_up, div_down, div_up, mult_down, mult_up
-from gmpy2 import mpfr
+from .rounding import add_down, add_up, sub_down, sub_up, div_down, div_up, mul_down, mul_up
 # Arithmetic layer rule:
 # never modify Interval class
 # never implement rounding here
@@ -14,14 +13,14 @@ def add(x: Interval, y:Interval) -> Interval:
   hi = add_up(x.hi, y.hi)
   return Interval(lo, hi)
 
-def subtract(x: Interval, y:Interval) -> Interval:
+def sub(x: Interval, y:Interval) -> Interval:
   if x.is_empty or y.is_empty:
     return Interval.empty()
-  lo = sub_down(x.lo, y.lo)
-  hi = sub_down(x.hi, y.hi)
+  lo = sub_down(x.lo, y.hi)
+  hi = sub_up(x.hi, y.lo)
   return Interval(lo, hi)
 
-def multiply(x: Interval, y:Interval) -> Interval:
+def mul(x: Interval, y:Interval) -> Interval:
   if x.is_empty or y.is_empty:
     return Interval.empty()
   p1 = mul_down(x.lo, y.lo)
