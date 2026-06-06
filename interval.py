@@ -63,6 +63,20 @@ class Interval:
         else:
             return self.lo + (self.hi - self.lo) / 2
 
+    @property
+    def magnitude(self):
+        if self.is_empty:
+            return Number("nan")
+        return max(abs(self.lo), abs(self.hi))
+    @property
+    def mignitude(self):
+        if self.is_empty:
+            return Number("nan")
+        if self.contains(0):
+            return Number(0)
+        
+        return min(abs(self.lo), abs(self.hi))
+    
     def contains(self, x):
         x = Number(x)
         if self.is_empty:
@@ -173,5 +187,14 @@ class Interval:
             return Interval.empty()
         return Interval(-self.hi, -self.lo)
 
+    def __abs__(self):
+        if self.is_empty:
+            return Interval.empty()
+
+        if self.lo >= 0:
+            return self
+        if self.hi <= 0:
+            return Interval(-self.hi, -self.lo)
+        return Interval(0, max(-self.lo, self.hi))
 
     
