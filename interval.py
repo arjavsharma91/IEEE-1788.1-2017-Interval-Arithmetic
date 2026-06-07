@@ -28,6 +28,12 @@ class Interval:
     def entire(cls):
         return cls(Number('-inf'), Number('inf'))
 
+    @classmethod
+    def _coerce(value, cls):
+        if isinstance(value, Interval):
+            return value
+        return cls(value, value)
+
     @property
     def is_empty(self):
         return self.lo > self.hi
@@ -162,26 +168,22 @@ class Interval:
 
     def __add__(self, other):
         from .arithmetic import add
-        if not isinstance(other, Interval):
-            other = Interval(other, other)
+        other = self._coerce(other)
         return add(self, other)
 
     def __sub__(self, other):
         from .arithmetic import sub
-        if not isinstance(other, Interval):
-            other = Interval(other, other)
+        other = self._coerce(other)
         return sub(self, other)
 
     def __mul__(self, other):
         from .arithmetic import mul
-        if not isinstance(other, Interval):
-            other = Interval(other, other)
+        other = self._coerce(other)
         return mul(self, other)
 
     def __truediv__(self, other):
         from .arithmetic import div
-        if not isinstance(other, Interval):
-            other = Interval(other, other)
+        other = self._coerce(other)
         return div(self, other)
 
     def __neg__(self):
@@ -201,7 +203,6 @@ class Interval:
 
     def __radd__(self, other):
         from .arithmetic import add
-
         other = Interval(other, other)
         return add(other, self)
 
