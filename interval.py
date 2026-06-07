@@ -131,8 +131,6 @@ class Interval:
         return not self.overlaps(other)
 
     def interior_contains(self, x):
-        if not isinstance(other, Interval):
-            raise TypeError("Expected Interval")
         if self.is_empty:
             return False
         x = Number(x)
@@ -149,11 +147,15 @@ class Interval:
         return other.lo < self.lo and self.hi < other.hi
 
     def precedes(self, other):
+        if not isinstance(other, Interval):
+            raise TypeError("Expected Interval")
         if self.is_empty or other.is_empty:
             return False
         return self.hi < other.lo
 
     def meets(self, other):
+        if not isinstance(other, Interval):
+            raise TypeError("Expected Interval")
         if self.is_empty or other.is_empty:
             return False
         return self.hi == other.lo or other.hi == self.lo
@@ -195,7 +197,7 @@ class Interval:
             return self
         if self.hi <= 0:
             return Interval(-self.hi, -self.lo)
-        return Interval(0, max(-self.lo, self.hi))
+        return Interval(Number(0), max(-self.lo, self.hi))
 
     def __radd__(self, other):
         from .arithmetic import add
@@ -213,7 +215,7 @@ class Interval:
         other = Interval(other, other)
         return mul(other, self)
 
-    def __rdiv__(self, other):
+    def __rtruediv__(self, other):
         from .arithmetic import div
         other = Interval(other, other)
         return div(other, self)
