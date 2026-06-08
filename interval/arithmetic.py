@@ -43,9 +43,8 @@ def mul(x: Interval, y:Interval) -> Interval:
 def reciprocal(x: Interval) -> Interval:
   if x.is_empty:
     return Interval.empty()
-
   if x.contains(0):
-    raise ZeroDivisionError("Cannot take reciprocal of interval containing 0")
+    return Interval.entire()
   lo = div_down(mpfr(1), x.hi)
   hi = div_up(mpfr(1), x.lo)
 
