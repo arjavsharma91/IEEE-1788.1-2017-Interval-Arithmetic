@@ -1,3 +1,5 @@
+from tests.utils import rand_interval_mixed
+
 def test_interval_invariants():
   x = rand_interval_mixed()
 
