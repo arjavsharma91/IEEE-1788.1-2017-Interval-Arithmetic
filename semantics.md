@@ -13,3 +13,4 @@ Undefined scalar quantities on empty intervals return NaN:
   -radius
   -magnitude
   -mignitude
+Division by intervals containing zero returns the entire interval as a conservative enclosure because disconnected interval unions are not currently represented.
