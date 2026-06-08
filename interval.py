@@ -29,8 +29,8 @@ class Interval:
         return cls(Number('-inf'), Number('inf'))
 
     @classmethod
-    def _coerce(value, cls):
-        if isinstance(value, Interval):
+    def _coerce(cls, value):
+        if isinstance(value, cls):
             return value
         return cls(value, value)
 
@@ -203,22 +203,22 @@ class Interval:
 
     def __radd__(self, other):
         from .arithmetic import add
-        other = Interval(other, other)
+        other = self._coerce(other)
         return add(other, self)
 
     def __rsub__(self, other):
         from .arithmetic import sub
-        other = Interval(other, other)
+        other = self._coerce(other)
         return sub(other, self)
 
     def __rmul__(self, other):
         from .arithmetic import mul
-        other = Interval(other, other)
+        other = self._coerce(other)
         return mul(other, self)
 
     def __rtruediv__(self, other):
         from .arithmetic import div
-        other = Interval(other, other)
+        other = self._coerce(other)
         return div(other, self)
     
 
