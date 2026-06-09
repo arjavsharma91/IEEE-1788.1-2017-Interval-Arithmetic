@@ -45,8 +45,14 @@ def reciprocal(x: Interval) -> Interval:
     return Interval.empty()
   if x.contains(0):
     return Interval.entire()
-  lo = div_down(mpfr(1), x.hi)
-  hi = div_up(mpfr(1), x.lo)
+  a = div_down(mpfr(1), x.lo)
+  b = div_down(mpfr(1), x.hi)
+
+  c = div_up(mpfr(1), x.lo)
+  d = div_up(mpfr(1), x.hi)
+
+  lo = min(a, b)
+  hi = max(c, d)
 
   return Interval(lo, hi)
 
