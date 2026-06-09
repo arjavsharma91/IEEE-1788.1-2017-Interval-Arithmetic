@@ -224,6 +224,22 @@ class Interval:
         from .arithmetic import div
         other = self._coerce(other)
         return div(other, self)
-    
+    @property
+    def is_strictly_positive(self):
+        return not self.is_empty and self.lo > 0
 
+    @property
+    def is_strictly_negative(self):
+        return not self.is_empty and self.hi < 0
     
+    @property
+    def is_nonnegative(self):
+        return not self.is_empty and self.lo >= 0
+
+    @property
+    def is_nonpositive(self):
+        return not self.is_empty and self.hi <= 0
+
+    @property
+    def contains_zero(self):
+        return self.contains(0)
