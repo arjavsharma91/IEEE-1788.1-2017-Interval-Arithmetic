@@ -1,4 +1,5 @@
 from gmpy2 import RoundDown, RoundUp, context, get_context, exp, log
+Number = mpfr
 
 def add_down(a, b):
     a = Number(a)
@@ -91,3 +92,16 @@ def log_up(a):
     with context(get_context()) as ctx:
         ctx.round = RoundUp
         return log(a)
+
+def pow_up(a, n):
+    a = Number(a)
+    n = Number(n)
+    with context(get_context()) as ctx:
+        ctx.round = RoundUp
+        return x ** n
+def pow_down(a, n):
+    a = Number(a)
+    n = Number(n)
+    with context(get_context()) as ctx:
+        ctx.round = RoundDown
+        return x ** n
