@@ -42,8 +42,6 @@ def mul_up(a, b):
         ctx.round = RoundUp
         return a*b
 
-# IMPORTANT, DIVISION IS WAY MORE COMPLEX THAN THIS, THIS IS JUST A BASE UNDERSTANDING
-
 def div_down(a, b):
     a = Number(a)
     b = Number(b)
@@ -58,6 +56,16 @@ def div_up(a, b):
         ctx.round = RoundUp
         return a / b
 
+def sqrt_up(a):
+    a = Number(a)
+    with context(get_context()) as ctx:
+        ctx.round = RoundUp
+    return sqrt(a)
 
+def sqrt_down(a):
+    a = Number(a)
+    with context(get_context()) as ctx:
+        ctx.round = RoundDown
+    return sqrt(b)
 
   
