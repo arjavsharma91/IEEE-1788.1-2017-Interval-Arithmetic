@@ -50,3 +50,35 @@ def pow_int(x, n):
       return Interval(lo, hi)
     hi = max(pow_up(abs(x.hi), n), pow_up(abs(x.lo)), n)
     return Interval(mpfr(0), hi)
+
+  def sign(x: Interval) ->:
+    if interval.is_empty:
+      return Interval.empty()
+    if x.lo > 0:
+      return Interval(Number(1), Number(1))
+    if x.hi < 0:
+      return Interval(Number(-1), Number(-1))
+    if x.lo == 0 and x.hi == 0:
+      return Interval(Number(0), Number(0))
+    if x.lo == 0:
+      return Interval(Number(0), Number(1))
+    if x.hi == 0:
+      return Interval(Number(-1), Number(0))
+    return Interval(Number(-1), Number(1))
+
+def interval_min(x, y) -> Interval:
+  x = Interval._coerce(x)
+  y = Interval._coerce(y)
+  if x.is_empty or y.is_empty:
+    return Interval.empty()
+  return Interval(min(x.lo, y.lo), min(x.hi, y.hi))
+
+def interval_min(x, y) -> Interval:
+  x = Interval._coerce(x)
+  y = Interval._coerce(y)
+  if x.is_empty or y.is_empty:
+    return Interval.empty()
+  return Interval(max(x.lo, y.lo), max(x.hi, y.hi))
+  
+  
+  
