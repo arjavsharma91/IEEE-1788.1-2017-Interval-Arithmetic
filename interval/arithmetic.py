@@ -7,21 +7,27 @@ from gmpy2 import mpfr
 # only combine endpoints using rounding.py
 # always return Interval
 
-def add(x: Interval, y:Interval) -> Interval:
+def add(x, y) -> Interval:
+  x = Interval._coerce(x)
+  y = Interval._coerce(y)
   if x.is_empty or y.is_empty:
     return Interval.empty()
   lo = add_down(x.lo, y.lo)
   hi = add_up(x.hi, y.hi)
   return Interval(lo, hi)
 
-def sub(x: Interval, y:Interval) -> Interval:
+def sub(x, y) -> Interval:
+  x = Interval._coerce(x)
+  y = Interval._coerce(y)
   if x.is_empty or y.is_empty:
     return Interval.empty()
   lo = sub_down(x.lo, y.hi)
   hi = sub_up(x.hi, y.lo)
   return Interval(lo, hi)
 
-def mul(x: Interval, y:Interval) -> Interval:
+def mul(x, y) -> Interval:
+  x = Interval._coerce(x)
+  y = Interval._coerce(y)
   if x.is_empty or y.is_empty:
     return Interval.empty()
   p1 = mul_down(x.lo, y.lo)
@@ -40,7 +46,8 @@ def mul(x: Interval, y:Interval) -> Interval:
 
   return Interval(lo, hi)
 
-def reciprocal(x: Interval) -> Interval:
+def reciprocal(x) -> Interval:
+  x = Interval._coerce(x)
   if x.is_empty:
     return Interval.empty()
   if x.contains(0):
@@ -58,7 +65,9 @@ def reciprocal(x: Interval) -> Interval:
 
 # This is primitive form of division right now, will work on edge cases and such when we get into decorations and stuff
 
-def div(x: Interval, y: Interval) -> Interval:
+def div(x, y) -> Interval:
+  x = Interval._coerce(x)
+  y = Interval._coerce(y)
   if x.is_empty or y.is_empty:
     return Interval.empty()
 
