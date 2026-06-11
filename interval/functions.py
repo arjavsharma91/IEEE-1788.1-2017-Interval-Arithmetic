@@ -4,7 +4,7 @@ from gmpy2 import mpfr
 from .arithmetic import reciprocal
 
 def sqrt(x: Interval) -> Interval:
-  x = x._coerce(x)
+  x = Interval._coerce(x)
   if x.is_empty:
     return Interval.empty()
   if x.hi < 0:
@@ -13,13 +13,13 @@ def sqrt(x: Interval) -> Interval:
   return Interval(sqrt_down(lo), sqrt_up(hi))
 
 def exp(x) -> Interval:
-  x = x._coerce(x)
+  x = Interval._coerce(x)
   if x.is_empty:
     return Interval.empty()
   return Interval(exp_down(self.lo), exp_up(self.hi))
 
 def log(x) -> Interval:
-  x = x._coerce(x)
+  x = Interval._coerce(x)
   if x.is_empty:
     return Interval.empty()
   if x.hi <= 0:
@@ -32,7 +32,7 @@ def log(x) -> Interval:
   return Interval(lo, hi)
 
 def pow_int(x, n):
-  x = x._coerce(x)
+  x = Interval._coerce(x)
   if x.is_empty:
     return Interval.empty()
   if n == 0:
@@ -56,7 +56,7 @@ def pow_int(x, n):
     return Interval(mpfr(0), hi)
 
 def sign(x) -> Interval:
-  x = x._coerce(x)
+  x = Interval._coerce(x)
   if interval.is_empty:
     return Interval.empty()
   if x.lo > 0:
