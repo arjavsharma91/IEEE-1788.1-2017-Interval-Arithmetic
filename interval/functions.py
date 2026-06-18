@@ -1,5 +1,5 @@
 from .interval import Interval
-from .rounding import add_up, add_down, sub_up, sub_down, mul_up, mul_down, div_up, div_down, sqrt_up, sqrt_down, exp_down, exp_up, log_up, log_down, pow_up, pow_down, root_up, root_down
+from .rounding import add_up, add_down, sub_up, sub_down, mul_up, mul_down, div_up, div_down, sqrt_up, sqrt_down, exp_down, exp_up, log_up, log_down, pow_up, pow_down, root_up, root_down, sin_up, sin_down, tan_up, tan_down
 from gmpy2 import mpfr, floor, ceil
 from .arithmetic import reciprocal
 from .constants import PI, TWO_PI, HALF_PI
@@ -141,4 +141,34 @@ def tan(x):
   lo = tan_down(x)
   hi = tan_up(x)
   return Interval(lo, hi)
-  
+
+def asin(x):
+  x = interval._coerce(x)
+  if x.is_empty:
+    return Interval.empty()
+  x = x.intersection(Interval(-1, 1))
+
+  if x.is_empty:
+    return Interval.empty()
+  return Interval(asin_down(x.lo), asin_up(x.hi))
+
+def acox(x):
+  x = interval._coerce(x)
+  if x.is_empty:
+    return Interval.empty()
+  x = x.intersection(Interval(-1, 1))
+  if x.is_empty:
+    return Interval.empty()
+  return Interval(acos_down(x.hi), acos_up(x.lo))
+
+def atan(x):
+  x = Interval._coerce(x)
+
+  if x.is_empty:
+    return Interval.empty()
+
+  return Interval(
+    atan_down(x.lo),
+    atan_up(x.hi)
+    )
+
