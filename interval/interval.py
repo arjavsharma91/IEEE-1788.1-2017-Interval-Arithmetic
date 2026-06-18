@@ -203,7 +203,7 @@ class Interval:
             return self
         if self.hi <= 0:
             return Interval(-self.hi, -self.lo)
-        return Interval(Number(0), max(-self.lo, self.hi))
+        return Interval(Number(0), Number(max(-self.lo, self.hi)))
 
     def __radd__(self, other):
         from .arithmetic import add
@@ -245,9 +245,8 @@ class Interval:
         return self.contains(0)
 
     def bisect(self):
-        if self.is_empty:
-            return (Interval.is_empty(), Interval.is_empty())
+    if self.is_empty:
+        return (Interval.empty(), Interval.empty())
 
-        m = self.midpoint
-
-        return (Interval(self.lo, m), Interval(m, self.hi))
+    m = self.midpoint
+    return (Interval(self.lo, m), Interval(m, self.hi))
