@@ -99,9 +99,9 @@ def nth_root(x, n) -> Interval:
   lo = max(x.lo, mpfr(0))
   return Interval(root_down(lo, n), root_up(x.hi, n))
 
-def contains_periodic_point(x, offset):
-  lower = (x.lo - offset) / TWO_PI
-  higher = (x.hi - offset) / TWO_PI
+def contains_periodic_point(x, offset, period):
+  lower = (x.lo - offset) / period
+  higher = (x.hi - offset) / period
   return ceil(lower) <= floor(upper)
 
 
@@ -118,9 +118,9 @@ def sin(x) -> Interval:
   lo = min(s1, s2)
   hi = min(t1, t2)
 
-  if contains_periodic_point(x, HALF_PI):
+  if contains_periodic_point(x, HALF_PI, TWO_PI):
     hi = mpfr(1)
-  if contains_periodic_point(x, -HALF_PI):
+  if contains_periodic_point(x, -HALF_PI, TWO_PI):
     lo = mpfr(-1)
   return Interval(lo, hi)
 
@@ -131,4 +131,14 @@ def cos(x):
     return Interval.empty()
 
   return sin(x + HALF_PI)
+  
+def tan(x):
+  x = Interval._coerce(x)
+  if x.is_empty:
+    return Interval.empty()
+  if contains_periodic_point(x, HALF_PI, PI):
+    return Interval.entire()
+  lo = tan_down(x)
+  hi = tan_up(x)
+  return Interval(lo, hi)
   
