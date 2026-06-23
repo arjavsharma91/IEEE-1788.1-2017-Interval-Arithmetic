@@ -24,7 +24,7 @@ class DecoratedInterval:
   
   @classmethod
   def entire(cls):
-    return cls(Interval.entire(), Decoration.TRV
+    return cls(Interval.entire(), Decoration.TRV)
 
   @classmethod
   def nai(cls):
