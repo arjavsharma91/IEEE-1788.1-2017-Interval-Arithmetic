@@ -108,16 +108,13 @@ def root_up(a, n):
     a = Number(a)
     with context(get_context()) as ctx:
         ctx.round = RoundUp
-        if a < 0 and n % 2 == 1:
-            return -root_down(-a, n)
-        return a ** (mpfr(1) / n)
+        return gmpy2.root(a, int(n))
+
 def root_down(a, n):
     a = Number(a)
     with context(get_context()) as ctx:
         ctx.round = RoundDown
-        if a < 0 and n % 2 == 1:
-            return -root_up(-a, n)
-        return a ** (mpfr(1) / n)
+        return gmpy2.root(a, int(n))
 
 def sin_up(a):
     a = Number(a)
