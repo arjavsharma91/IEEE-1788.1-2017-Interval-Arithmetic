@@ -253,6 +253,26 @@ class Interval:
         if self.is_empty and other.is_empty:
             return True
         return self.lo == other.lo and self.hi == other.hi
+    def __lt__(self, other):
+        if not isinstance(other, Interval):
+            other = self._coerce(other)
+        if self.is_empty or other.is_empty:
+            return False
+        return self.hi < other.lo
+
+    def __gt__(self, other):
+        if not isinstance(other, Interval):
+            other = self._coerce(other)
+        if self.is_empty or other.is_empty:
+            return False
+        return self.lo > other.hi
+
+    def possibly_less_than(self, other):
+        if not isinstance(other, Interval):
+            other = self._coerce(other)
+        if self.is_empty or other.is_empty:
+            return False
+        return self.lo <= other.hi
 
     def bisect(self):
         if self.is_empty:
