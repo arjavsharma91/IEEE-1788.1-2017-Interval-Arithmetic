@@ -95,56 +95,80 @@ class DecoratedInterval:
 
   def __add__(self, other):
     from .decorated_arithmetic import add
+    other = self._coerce(other)
     if self.is_nai or other.is_nai:
       return DecoratedInterval.new_nai()
-    other = self._coerce(other)
     return add(self, other)
 
   def __sub__(self, other):
     from .decorated_arithmetic import sub
+    other = self._coerce(other)
     if self.is_nai or other.is_nai:
       return DecoratedInterval.new_nai()
-    other = self._coerce(other)
     return sub(self, other)
 
   def __mul__(self, other):
     from .decorated_arithmetic import mul
+    other = self._coerce(other)
     if self.is_nai or other.is_nai:
       return DecoratedInterval.new_nai()
-    other = self._coerce(other)
     return mul(self, other)
 
   def __truediv__(self, other):
     from .decorated_arithmetic import div
+    other = self._coerce(other)
     if self.is_nai or other.is_nai:
       return DecoratedInterval.new_nai()
-    other = self._coerce(other)
     return div(self, other)
 
   def __radd__(self, other):
     from .decorated_arithmetic import add
+    other = self._coerce(other)
     if self.is_nai or other.is_nai:
       return DecoratedInterval.new_nai()
-    other = self._coerce(other)
     return add(other, self)
 
   def __rsub__(self, other):
     from .decorated_arithmetic import sub
+    other = self._coerce(other)
     if self.is_nai or other.is_nai:
       return DecoratedInterval.new_nai()
-    other = self._coerce(other)
     return sub(other, self)
 
   def __rmul__(self, other):
     from .decorated_arithmetic import mul
+    other = self._coerce(other)
     if self.is_nai or other.is_nai:
       return DecoratedInterval.new_nai()
-    other = self._coerce(other)
     return mul(other, self)
 
   def __rtruediv__(self, other):
     from .decorated_arithmetic import div
+    other = self._coerce(other)
     if self.is_nai or other.is_nai:
       return DecoratedInterval.new_nai()
-    other = self._coerce(other)
     return div(other, self)
+
+def __lt__(self, other):
+  other = self._coerce(other)
+  if self.is_nai or other.is_nai:
+    return False
+  if self.interval.is_empty or other.interval.is_empty:
+    return False
+  return self.interval.hi < other.interval.lo
+
+def __gt__(self, other):
+  other = self._coerce(other)
+  if self.is_nai or other.is_nai:
+    return False
+  if self.interval.is_empty or other.interval.is_empty:
+    return False
+  return self.interval.lo > other.interval.hi
+
+def possibly_less_than(self, other):
+  other = self._coerce(other)
+  if self.is_nai or other.is_nai:
+    return False
+  if self.interval.is_empty or other.interval.is_empty:
+    return False
+  return self.interval.lo <= other.interval.hi
