@@ -68,8 +68,12 @@ class Interval:
     def midpoint(self):
         if self.is_empty:
             return Number("nan")
-        if not self.is_bounded:
-            return Number('nan')
+        if self.is_entire:
+            return Number(0)
+        if self.lo == Number('-inf'):
+            return Number('-inf')
+        if self.hi == Number('inf'):
+            return Number('inf')
         else:
             return self.lo + (self.hi - self.lo) / 2
 
@@ -244,9 +248,15 @@ class Interval:
     def contains_zero(self):
         return self.contains(0)
 
-    def bisect(self):
-    if self.is_empty:
-        return (Interval.empty(), Interval.empty())
+    def __eq__(self, other):
+        other = self._coerce(other)
+        if self.is_empty and other.is_empty:
+            return True
+        return self.lo == other.lo and self.hi == other.hi
 
-    m = self.midpoint
-    return (Interval(self.lo, m), Interval(m, self.hi))
+    def bisect(self):
+        if self.is_empty:
+            return (Interval.empty(), Interval.empty())
+
+        m = self.midpoint
+        return (Interval(self.lo, m), Interval(m, self.hi))
