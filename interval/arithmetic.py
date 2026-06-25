@@ -50,17 +50,15 @@ def reciprocal(x) -> Interval:
   if x.is_empty:
     return Interval.empty()
   if x.contains_zero:
+    if x.lo == 0 and x.hi == 0:
+      return Interval.empty()
+    if x.lo == 0:
+      return Interval(div_down(mpfr(1), x.hi), mpfr('inf'))
+    if x.hi == 0:
+      return Interval(mpfr('-inf'), div_up(mpfr(1), x.lo))
     return Interval.entire()
-  a = div_down(mpfr(1), x.lo)
-  b = div_down(mpfr(1), x.hi)
 
-  c = div_up(mpfr(1), x.lo)
-  d = div_up(mpfr(1), x.hi)
-
-  lo = min(a, b)
-  hi = max(c, d)
-
-  return Interval(lo, hi)
+  return Interval(div_down(mpfr(1), x.hi), div_up(mpfr(1), x.lo))
 
 def div(x, y) -> Interval:
   x = Interval._coerce(x)
@@ -69,10 +67,12 @@ def div(x, y) -> Interval:
     return Interval.empty()
 
   if y.contains_zero:
-    if y.is_point and y.lo == 0:
-      if x.is_point and x.lo == 0:
+    if y.hi == 0 and y.lo == 0:
+      if x.hi == 0 and x.lo == 0:
         return Interval.empty()
       return Interval.entire()
+    if x.lo == 0 and x.hi == 0:
+      return x
   
   return mul(x, reciprocal(y))
   
