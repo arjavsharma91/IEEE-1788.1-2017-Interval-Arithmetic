@@ -325,3 +325,42 @@ def atanh(x):
     dec = Decoration.DAC
 
   return DecoratedInterval(interval, dec)
+
+
+def abs(x):
+  x = Interval._coerce(x)
+  if x.is_empty:
+    return Interval.empty()
+  if x.lo >= 0:
+    return Interval(x.lo, x.hi)
+  elif x.hi <= 0:
+    return Interval(-x.hi, -x.lo)
+
+  hi = max(-x.lo, x.hi)
+  return Interval(Number(0), hi)
+
+def atan2(x, y):
+  y = Interval._coerce(y)
+  x = Interval._coerce(x)
+
+  if y.is_empty or x.is_empty:
+    return Interval.empty()
+
+  if y.lo == 0 and y.hi == 0 and x.lo == 0 and x.hi == 0:
+    return Interval.empty()
+
+  if x.lo < 0 and y.lo < 0 and y.hi > 0:
+    with context(get_context()) as ctx:
+      ctx.round = RoundDown
+      lo = -PI
+    with context(get_context()) as ctx:
+      ctx.round = RoundUp
+      hi = PI
+    return Interval(lo, hi)
+
+  c1_lo, c1_up = atan2_down(y.lo, x.lo), atan2_up(y.lo, x.lo)
+  c2_lo, c2_up = atan2_down(y.lo, x.hi), atan2_up(y.lo, x.hi)
+  c3_lo, c3_hi = atan2_down(y.hi, x.lo), atan2_up(y.hi, x.lo)
+  c4_lo, c4_hi = atan2_down(y.hi, x.hi), atan2_up(y.hi, x.hi)
+
+  return Interval(min(c1_lo, c2_lo, c3_lo, c4_lo), max(c1_hi, c2_hi, c3_hi, c4_hi))
