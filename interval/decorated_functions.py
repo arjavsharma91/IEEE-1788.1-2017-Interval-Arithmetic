@@ -1,6 +1,6 @@
 from .decorated_interval import DecoratedInterval
 from .decorations import Decoration, combine
-#Ill import the functions later cuz im stupid and lazy
+from .functions import exp as bare_exp, sqrt as bare_sqrt, log as bare_log, pow_int as bare_pow_int, sign as bare_sign, interval_min as bare_interval_min, interval_max as bare_interval_max, nth_root as bare_nth_root, sin as bare_sin, cos as bare_cos, tan as bare_tan, asin as bare_asin, acos as bare_acos, atan as bare_atan, sinh as bare_sinh, cosh as bare_cosh, tanh as bare_tanh, asinh as bare_asinh, acosh as bare_acosh, atanh as bare_atanh, abs as bare_abs, atan2 as bare_atan2 
 
 def exp(x):
   x = DecoratedInterval._coerce(x)
@@ -197,7 +197,7 @@ def asin(x):
 
   return DecoratedInterval(interval, dec)
 
-def asin(x):
+def acos(x):
   x = DecoratedInterval._coerce(x)
   if x.is_nai:
     return DecoratedInterval.new_nai()
