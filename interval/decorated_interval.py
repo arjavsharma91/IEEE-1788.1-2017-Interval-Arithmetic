@@ -27,7 +27,7 @@ class DecoratedInterval:
   
   @classmethod
   def entire(cls):
-    return cls(Interval.entire(), Decoration.TRV)
+    return cls(Interval.entire(), Decoration.DAC)
 
   @classmethod
   def new_nai(cls):
@@ -84,25 +84,37 @@ class DecoratedInterval:
 
   @property
   def width(self):
+    if self.is_nai:
+      return Number('nan')
     return self.interval.width
 
   @property
   def radius(self):
+    if self.is_nai:
+      return Number('nan')
     return self.interval.radius
 
   @property
   def midpoint(self):
+    if self.is_nai:
+      return Number('nan')
     return self.interval.midpoint
 
   @property
   def magnitude(self):
+    if self.is_nai:
+      return Number('nan')
     return self.interval.magnitude
 
   @property
   def mignitude(self):
+    if self.is_nai:
+      return Number('nan')
     return self.interval.mignitude
 
   def contains(self, x):
+    if self.is_nai:
+      return False
     return self.interval.contains(x)
 
   def __repr__(self):
@@ -177,26 +189,26 @@ class DecoratedInterval:
       return DecoratedInterval.new_nai()
     return div(other, self)
 
-def __lt__(self, other):
-  other = self._coerce(other)
-  if self.is_nai or other.is_nai:
-    return False
-  if self.interval.is_empty or other.interval.is_empty:
-    return False
-  return self.interval.hi < other.interval.lo
+  def __lt__(self, other):
+    other = self._coerce(other)
+    if self.is_nai or other.is_nai:
+      return False
+    if self.interval.is_empty or other.interval.is_empty:
+      return False
+    return self.interval.hi < other.interval.lo
 
-def __gt__(self, other):
-  other = self._coerce(other)
-  if self.is_nai or other.is_nai:
-    return False
-  if self.interval.is_empty or other.interval.is_empty:
-    return False
-  return self.interval.lo > other.interval.hi
+  def __gt__(self, other):
+    other = self._coerce(other)
+    if self.is_nai or other.is_nai:
+      return False
+    if self.interval.is_empty or other.interval.is_empty:
+      return False
+    return self.interval.lo > other.interval.hi
 
-def possibly_less_than(self, other):
-  other = self._coerce(other)
-  if self.is_nai or other.is_nai:
-    return False
-  if self.interval.is_empty or other.interval.is_empty:
-    return False
-  return self.interval.lo <= other.interval.hi
+  def possibly_less_than(self, other):
+    other = self._coerce(other)
+    if self.is_nai or other.is_nai:
+      return False
+    if self.interval.is_empty or other.interval.is_empty:
+        return False
+    return self.interval.lo <= other.interval.hi
