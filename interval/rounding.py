@@ -1,4 +1,4 @@
-from gmpy2 import RoundDown, RoundUp, context, get_context, exp, log, mpfr, sin, cos, asin, atan, acos, tan, sqrt, sinh, tanh, cosh, asinh, acosh, atanh, atan2
+from gmpy2 import RoundDown, RoundUp, context, get_context, exp, log, mpfr, sin, cos, asin, atan, acos, tan, sqrt, sinh, tanh, cosh, asinh, acosh, atanh, atan2, pow, root
 Number = mpfr
 
 def add_down(a, b):
@@ -97,24 +97,24 @@ def pow_up(a, n):
     a = Number(a)
     with context(get_context()) as ctx:
         ctx.round = RoundUp
-        return a ** n
+        return pow(a, n)
 def pow_down(a, n):
     a = Number(a)
     with context(get_context()) as ctx:
         ctx.round = RoundDown
-        return a ** n
+        return pow(a, n)
 
 def root_up(a, n):
     a = Number(a)
     with context(get_context()) as ctx:
         ctx.round = RoundUp
-        return gmpy2.root(a, int(n))
+        return root(a, int(n))
 
 def root_down(a, n):
     a = Number(a)
     with context(get_context()) as ctx:
         ctx.round = RoundDown
-        return gmpy2.root(a, int(n))
+        return root(a, int(n))
 
 def sin_up(a):
     a = Number(a)
@@ -260,16 +260,16 @@ def atanh_down(a):
         ctx.round = RoundDown
         return atanh(a)
 
-def atan2_down(x, y):
+def atan2_down(y, x):
     x = Number(x)
     y = Number(y)
     with context(get_context()) as ctx:
         ctx.round = RoundDown
-        return atan2(a)
+        return atan2(y, x)
 
-def atan2_up(x, y):
+def atan2_up(y, x):
     x = Number(x)
     y = Number(y)
     with context(get_context()) as ctx:
         ctx.round = RoundUp
-        return atan2(a)
+        return atan2(y, x)
