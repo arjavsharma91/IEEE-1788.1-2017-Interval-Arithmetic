@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from gmpy2 import mpfr
+from gmpy2 import mpfr, RoundUp, RoundDown, context, get_context
 import re
 
 Number = mpfr
@@ -82,12 +82,23 @@ class Interval:
     @property
     def width(self):
         if self.is_empty:
-            return Number('nan')
-        return (self.hi - self.lo)
+            return Number(0)
+        if not self.is_bounded:
+            return Number('inf')
+        with context(get_context()) as ctx:
+            ctx.round = RoundUp
+            return self.hi - self.lo
     
     @property
     def radius(self):
-        return self.width / 2
+        if self.is_empty:
+            return Number(0)
+        if not self.is_bounded:
+            return Number('inf')
+
+        with context(get_context()) as ctx:
+            ctx.round = RoundUp
+            return (self.hi - self.lo) / 2
 
     @property
     def midpoint(self):
@@ -95,11 +106,8 @@ class Interval:
             return Number("nan")
         if self.is_entire:
             return Number(0)
-        if self.lo == Number('-inf'):
-            return Number('-inf')
-        if self.hi == Number('inf'):
-            return Number('inf')
-        else:
+        with context(get_context()) as ctx:
+            ctx.round = RoundNearest
             return self.lo + (self.hi - self.lo) / 2
 
     @property
