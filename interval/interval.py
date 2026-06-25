@@ -45,7 +45,7 @@ class Interval:
             return cls(mpfr('-inf'), mpfr('inf'))
         match = re.match(r"^\[\s*([^,]+)\s*,\s*([^\]]+)\s*\]$", s)
         if not match:
-            raise ValueError("Malformed Interval String: {s}")
+            raise ValueError(f"Malformed Interval String: {s}")
 
         str_lo, str_hi = match.group(1).strip(), match.group(2).strip()
 
@@ -174,7 +174,7 @@ class Interval:
             return "Interval.entire()"
         return f"Interval({self.lo}, {self.hi})"
 
-    def __str(self):
+    def __str__(self):
         if self.is_empty:
             return "[empty]"
         if self.is_entire:
