@@ -328,39 +328,39 @@ def atanh(x):
 
 
 def abs(x):
-  x = Interval._coerce(x)
-  if x.is_empty:
-    return Interval.empty()
-  if x.lo >= 0:
-    return Interval(x.lo, x.hi)
-  elif x.hi <= 0:
-    return Interval(-x.hi, -x.lo)
+  x = DecoratedInterval._coerce(x)
+  if x.is_nai:
+    return DecoratedInterval.new_nai()
+  op_dec = Decoration.COM
 
-  hi = max(-x.lo, x.hi)
-  return Interval(Number(0), hi)
+  interval = bare_abs(x.interval)
+  dec = combine(x.decoration, op_dec)
 
-def atan2(x, y):
-  y = Interval._coerce(y)
-  x = Interval._coerce(x)
+  if dec == Decoration.COM and not interval.is_bounded:
+    dec = Decoration.DAC
 
-  if y.is_empty or x.is_empty:
-    return Interval.empty()
+  return DecoratedInterval(interval, dec)
 
-  if y.lo == 0 and y.hi == 0 and x.lo == 0 and x.hi == 0:
-    return Interval.empty()
+def atan2(y, x):
+  y = DecoratedInterval._coerce(y)
+  x = DecoratedInterval._coerce(x)
 
-  if x.lo < 0 and y.lo < 0 and y.hi > 0:
-    with context(get_context()) as ctx:
-      ctx.round = RoundDown
-      lo = -PI
-    with context(get_context()) as ctx:
-      ctx.round = RoundUp
-      hi = PI
-    return Interval(lo, hi)
+  if y.is_nai or x.is_nai:
+    return DecoratedInterval.new_nai()
 
-  c1_lo, c1_up = atan2_down(y.lo, x.lo), atan2_up(y.lo, x.lo)
-  c2_lo, c2_up = atan2_down(y.lo, x.hi), atan2_up(y.lo, x.hi)
-  c3_lo, c3_hi = atan2_down(y.hi, x.lo), atan2_up(y.hi, x.lo)
-  c4_lo, c4_hi = atan2_down(y.hi, x.hi), atan2_up(y.hi, x.hi)
+  if y.interval.contains(0) and x.interval.contains(0):
+    if y.interval.lo == 0 and y.interval.hi == 0 and x.interval.lo == 0 and x.interval.hi == 0:
+      return DecoratedInterval.empty()
+    op_dec = Decoration.TRV
+  elif x.interval.lo < 0 and y.interval.contains(0):
+    op_dec = Decoration.DEF
+  else:
+    op_dec = Decoration.COM
 
-  return Interval(min(c1_lo, c2_lo, c3_lo, c4_lo), max(c1_hi, c2_hi, c3_hi, c4_hi))
+  interval = bare_atan2(y.interval, x.interval)
+  dec = combine(x.decoration, op_dec)
+
+  if dec == Decoration.COM and not interval.is_bounded:
+    dec = Decoration.DAC
+
+  return DecoratedInterval(interval, dec)
