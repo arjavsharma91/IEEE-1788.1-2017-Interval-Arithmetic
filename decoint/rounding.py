@@ -1,4 +1,4 @@
-from gmpy2 import RoundDown, RoundUp, context, get_context, exp, log, mpfr, sin, cos, asin, atan, acos, tan, sqrt, sinh, tanh, cosh, asinh, acosh, atanh, atan2, pow, root
+from gmpy2 import RoundDown, RoundUp, context, get_context, exp, log, mpfr, sin, cos, asin, atan, acos, tan, sqrt, sinh, tanh, cosh, asinh, acosh, atanh, atan2, root
 Number = mpfr
 
 def add_down(a, b):
@@ -97,12 +97,12 @@ def pow_up(a, n):
     a = Number(a)
     with context(get_context()) as ctx:
         ctx.round = RoundUp
-        return pow(a, n)
+        return a ** n
 def pow_down(a, n):
     a = Number(a)
     with context(get_context()) as ctx:
         ctx.round = RoundDown
-        return pow(a, n)
+        return a ** n
 
 def root_up(a, n):
     a = Number(a)
