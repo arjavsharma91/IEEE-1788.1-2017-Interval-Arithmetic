@@ -1,5 +1,5 @@
 from .interval import Interval
-from .arithmetic import add as bare_add, sub as bare_sub, mul as bare_mul, div as bare_div
+from .arithmetic import add as bare_add, sub as bare_sub, mul as bare_mul, div as bare_div, reciprocal as bare_reciprocal
 from .decorations import Decoration, combine
 from .decorated_interval import DecoratedInterval
 
@@ -45,6 +45,20 @@ def mul(x, y):
   dec = combine(x.decoration, y.decoration)
   dec = _finalize_decoration(dec, interval)
 
+  return DecoratedInterval(interval, dec)
+
+def reciprocal(x):
+  x = DecoratedInterval._coerce(x)
+  if x.is_nai:
+    return DecoratedInterval.new_nai()
+  if x.interval.contains(0):
+    if x.interval.lo < 0 and x.interval.hi > 0:
+      return DecoratedInterval(Interval.entire(), Decoration.TRV)
+    interval = bare_reciprocal(x.interval)
+    return DecoratedInterval(interval, Decoration.TRV)
+  interval = bare_reciprocal(x.interval)
+  dec = x.decoration
+  dec = _finalize_decoration(dec, interval)
   return DecoratedInterval(interval, dec)
 
 def div(x, y):
