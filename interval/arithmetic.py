@@ -67,8 +67,10 @@ def div(x, y) -> Interval:
     return Interval.empty()
 
   if y.contains_zero:
-    if y.hi == 0 and y.lo == 0 and x.lo == 0 and x.hi == 0:
-      return Interval.empty()
+    if y.hi == 0 and y.lo == 0:
+      if x.hi == 0 and x.lo == 0:
+        return Interval.empty()
+      return Interval.entire()
     if x.contains(0):
       return Interval.entire()
   
