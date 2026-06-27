@@ -3,6 +3,7 @@ from .rounding import add_up, add_down, sub_up, sub_down, mul_up, mul_down, div_
 from gmpy2 import mpfr, floor, ceil
 from .arithmetic import reciprocal
 from .constants import PI, TWO_PI, HALF_PI
+import builtins
 
 Number = mpfr
 
@@ -52,12 +53,16 @@ def pow_int(x, n):
       hi = pow_up(x.hi, n)
       return Interval(lo, hi)
     if x.hi <= 0:
-      lo = pow_down(abs(x.hi), n)
-      hi = pow_up(abs(x.lo), n)
+      hi_sub = builtins.abs(x.hi)
+      lo_sub = builtins.abs(x.lo)
+      lo = pow_down(hi_sub, n)
+      hi = pow_up(lo_sub, n)
       return Interval(lo, hi)
+    hi_sub = builtins.abs(x.hi)
+    lo_sub = builtins.abs(x.lo)
     hi = max(
-    pow_up(abs(x.hi), n),
-    pow_up(abs(x.lo), n)
+    pow_up(hi_sub, n),
+    pow_up(lo_sub, n)
     )
     return Interval(mpfr(0), hi)
 
@@ -275,3 +280,4 @@ def atan2(x, y):
   c4_lo, c4_hi = atan2_down(y.hi, x.hi), atan2_up(y.hi, x.hi)
 
   return Interval(min(c1_lo, c2_lo, c3_lo, c4_lo), max(c1_hi, c2_hi, c3_hi, c4_hi))
+
