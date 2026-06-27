@@ -75,4 +75,3 @@ def div(x, y) -> Interval:
       return Interval.entire()
   
   return mul(x, reciprocal(y))
-  
