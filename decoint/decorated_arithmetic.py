@@ -1,5 +1,5 @@
 from .interval import Interval
-from .arithmetic import add as bare_add, sub as bare_sub, mul as bare_mul, div as bare_div, reciprocal as bare_reciprocal
+from .arithmetic import add as bare_add, sub as bare_sub, mul as bare_mul, div as bare_div
 from .decorations import Decoration, combine
 from .decorated_interval import DecoratedInterval
 
