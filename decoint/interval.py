@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from gmpy2 import mpfr, RoundUp, RoundDown, context, get_context
+from gmpy2 import mpfr, RoundUp, RoundDown, context, get_context, is_nan
 import re
 
 Number = mpfr
@@ -9,10 +9,12 @@ class Interval:
     hi: Number
 
     def __post_init__(self):
-        lo = Number(self.lo)
-        hi = Number(self.hi)
+        with context(get_context(), round=RoundDown):
+            lo = Number(self.lo)
+        with context(get_context(), round=RoundUp):
+            hi = Number(self.hi)
 
-        if lo.isnan() or hi.isnan():
+        if is_nan(lo) or is_nan(hi):
             raise ValueError("NaN Endpoints are Invalid")
 
         if lo > hi:
@@ -338,3 +340,4 @@ class Interval:
         with context(get_context()) as ctx:
             ctx.round = RoundUp
             return self.hi - other.hi
+
