@@ -10,7 +10,7 @@ from .decorated_functions import (
     exp, log, sqrt, pow_int, sign, 
     sin, cos, tan, asin, acos, atan, 
     sinh, cosh, tanh, asinh, acosh, atanh, 
-    abs, atan2, interval_min, interval_max, nth_root
+    abs, atan2, interval_min, interval_max, nth_root, sqr
 )
 
 __all__ = [
@@ -19,5 +19,5 @@ __all__ = [
     'exp', 'log', 'sqrt', 'pow_int', 'sign',
     'sin', 'cos', 'tan', 'asin', 'acos', 'atan',
     'sinh', 'cosh', 'tanh', 'asinh', 'acosh', 'atanh',
-    'abs', 'atan2', 'interval_min', 'interval_max', 'nth_root'
+    'abs', 'atan2', 'interval_min', 'interval_max', 'nth_root', 'sqr'
 ]
