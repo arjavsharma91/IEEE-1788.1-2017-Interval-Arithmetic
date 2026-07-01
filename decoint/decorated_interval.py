@@ -1,13 +1,14 @@
 from .interval import Interval
 from dataclasses import dataclass
-from .decorations import Decoration
+from .decorations import Decoration, combine
 from gmpy2 import mpfr as Number
 
 @dataclass(frozen=True)
 class DecoratedInterval:
-  interval: Interval
-  decoration: Decoration
+  interval: Interval = Interval.empty()
+  decoration: Decoration = Decoration.COM
   nai: bool = False
+    
   def __post_init__(self):
     if not isinstance(self.interval, Interval):
       raise TypeError("Expected Interval")
@@ -15,12 +16,21 @@ class DecoratedInterval:
     if not isinstance(self.decoration, Decoration):
       raise TypeError("Expected Decoration")
 
+    if self.nai:
+      if self.decoration != Decoration.ILL:
+        object.__setattr__(self, "decoration", Decoration.ILL)
+        object.__setattr__(self, "interval", Interval(Number('nan'), Number('nan')))
+
+    if self.decoration == Decoration.ILL:
+      object.__setattr__(self, "nai", True)
+      object.__setattr__(self, "interval", Interval(Number('nan'), Number('nan')))
+
     if self.interval.is_empty and not self.nai:
       object.__setattr__(self, "decoration", Decoration.TRV)
-    
-    if self.nai:
-      if self.decoration != Decoration.NAI:
-        raise ValueError("NaI must have decoration NAI")
+
+    if not self.interval.is_bounded and not self.nai and not self.interval.is_empty and self.decoration > Decoration.DAC:
+      object.__setattr__(self, "decoration", Decoration.DAC)
+
   
   @classmethod
   def empty(cls):
@@ -32,7 +42,7 @@ class DecoratedInterval:
 
   @classmethod
   def new_nai(cls):
-    return cls(Interval.empty(), Decoration.NAI, nai = True)
+    return cls(Interval(Number('nan'), Number('nan')), Decoration.ILL, nai = True)
 
   @classmethod
   def _coerce(cls, value):
@@ -57,7 +67,7 @@ class DecoratedInterval:
     s = s.strip()
     s_lower = s.lower()
 
-    if s_lower in ("[nan]", "[nai]", "nai"):
+    if s_lower in ("[nan]", "[nai]", "nai", "[nai]_ill", "[nan, nan]_ill"):
       return cls.new_nai()
 
     if "_" in s:
@@ -174,7 +184,7 @@ class DecoratedInterval:
 
   def __repr__(self):
     if self.nai:
-      return "DecoratedInterval(NaI)"
+      return "DecoratedInterval(nai)"
 
     return (
       f"DecoratedInterval("
@@ -183,7 +193,7 @@ class DecoratedInterval:
 
   def __str__(self):
     if self.nai:
-      return "[NaI]"
+      return "[nai]_ill"
     int_str = str(self.interval)
     dec_str = self.decoration.name.lower()
     return f"{int_str}_{dec_str}"
