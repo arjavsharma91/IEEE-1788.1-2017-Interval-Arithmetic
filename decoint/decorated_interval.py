@@ -2,6 +2,7 @@ from .interval import Interval
 from dataclasses import dataclass
 from .decorations import Decoration, combine
 from gmpy2 import mpfr as Number
+from gmpy2 import is_nan
 
 @dataclass(frozen=True)
 class DecoratedInterval:
@@ -24,6 +25,11 @@ class DecoratedInterval:
     if self.decoration == Decoration.ILL:
       object.__setattr__(self, "nai", True)
       object.__setattr__(self, "interval", Interval(Number('nan'), Number('nan')))
+
+    if is_nan(self.interval.lo) or is_nan(self.interval.hi):
+      object.__setattr__(self, "nai", True)
+      object.__setattr__(self, "interval", Interval(Number('nan'), Number('nan')))
+      object.__setattr__(self, "decoration", Decoration.ILL)
 
     if self.interval.is_empty and not self.nai:
       object.__setattr__(self, "decoration", Decoration.TRV)
@@ -64,21 +70,26 @@ class DecoratedInterval:
 
   @classmethod
   def from_string(cls, s: str):
-    s = s.strip()
-    s_lower = s.lower()
+    s_s = s.strip()
 
-    if s_lower in ("[nan]", "[nai]", "nai", "[nai]_ill", "[nan, nan]_ill"):
+    if s_s in ("[nan]", "[nai]", "nai", "[nai]_ill", "[nan, nan]_ill"):
       return cls.new_nai()
 
-    if "_" in s:
+    if "_" in s_s:
       interval_part, dec_part = s.rsplit("_", 1)
       try:
         dec = Decoration[dec_part.upper()]
       except KeyError:
-        raise ValueError(f"Unknown Decoration Suffix {dec_part}")
-      bare_int = Interval.from_string(interval_part)
+        return cls.new_nai()
+      try:
+        bare_int = Interval.from_string(interval_part)
+      except ValueError:
+        return cls.new_nai()
     else:
-      bare_int = Interval.from_string(s)
+      try:
+        bare_int = Interval.from_string(s_s)
+      except ValueError:
+        return cls.new_nai()
       if bare_int.is_empty:
         dec = Decoration.TRV
       elif bare_int.lo == Number('-inf') or bare_int.hi == Number('inf'):
