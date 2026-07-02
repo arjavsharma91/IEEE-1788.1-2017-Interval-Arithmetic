@@ -14,9 +14,6 @@ class Interval:
         with context(get_context(), round=RoundUp):
             hi = Number(self.hi)
 
-        if is_nan(lo) or is_nan(hi):
-            raise ValueError("NaN Endpoints are Invalid")
-
         if lo > hi:
             lo = Number('inf')
             hi = Number('-inf')
@@ -340,4 +337,3 @@ class Interval:
         with context(get_context()) as ctx:
             ctx.round = RoundUp
             return self.hi - other.hi
-
