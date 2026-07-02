@@ -1,7 +1,7 @@
 from enum import IntEnum
 
 class Decoration(IntEnum):
-  NAI = 0
+  ILL = 0
   TRV = 1
   DEF = 2
   DAC = 3
@@ -13,7 +13,6 @@ class Decoration(IntEnum):
 def combine(*decorations: Decoration) -> Decoration:
   # IEEE 1788 requires that the minimum decoration has to be the one that is returned
   if not decorations:
-    raise ValueError("combine() requires at least one decoration")
+    return Decoration.ILL
 
   return min(decorations)
-  
