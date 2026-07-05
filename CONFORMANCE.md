@@ -1,7 +1,7 @@
 # IEEE 1788.1-2017 Conformance Statement
-**Library:** Decoint
+**Library:** Decoint   
 **Version:** 1.0.0  
-**Author:** Arjav Sharma
+**Author:** Arjav Sharma   
 **Date:** July 5, 2026  
 
 ---
