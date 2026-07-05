@@ -1,5 +1,5 @@
 from .interval import Interval
-from .arithmetic import add as bare_add, sub as bare_sub, mul as bare_mul, div as bare_div
+from .arithmetic import add as bare_add, sub as bare_sub, mul as bare_mul, div as bare_div, reciprocal as bare_reciprocal, fma as bare_fma
 from .decorations import Decoration, combine
 from .decorated_interval import DecoratedInterval
 
@@ -81,6 +81,21 @@ def div(x, y):
 
   interval = bare_div(x.interval, y.interval)
   dec = combine(x.decoration, y.decoration)
+  dec = _finalize_decoration(dec, interval)
+
+  return DecoratedInterval(interval, dec)
+
+def fma(x, y, z):
+  x = DecoratedInterval._coerce(x)
+  y = DecoratedInterval._coerce(y)
+  z = DecoratedInterval._coerce(z)
+
+  if x.is_nai or y.is_nai or z.is_nai:
+    return DecoratedInterval.new_nai()
+
+  interval = bare_fma(x.interval, y.interval, z.interval)
+  dec = combine(x.decoration, y.decoration, z.decoration)
+
   dec = _finalize_decoration(dec, interval)
 
   return DecoratedInterval(interval, dec)
