@@ -1,6 +1,6 @@
 from .decorated_interval import DecoratedInterval
 from .decorations import Decoration, combine
-from .functions import exp as bare_exp, sqrt as bare_sqrt, log as bare_log, pow_int as bare_pow_int, sign as bare_sign, interval_min as bare_interval_min, interval_max as bare_interval_max, nth_root as bare_nth_root, sin as bare_sin, cos as bare_cos, tan as bare_tan, asin as bare_asin, acos as bare_acos, atan as bare_atan, sinh as bare_sinh, cosh as bare_cosh, tanh as bare_tanh, asinh as bare_asinh, acosh as bare_acosh, atanh as bare_atanh, abs as bare_abs, atan2 as bare_atan2, contains_periodic_point as bare_contains_periodic_point, sqr as bare_sqr
+from .functions import exp as bare_exp, sqrt as bare_sqrt, log as bare_log, pow_int as bare_pow_int, sign as bare_sign, interval_min as bare_interval_min, interval_max as bare_interval_max, nth_root as bare_nth_root, sin as bare_sin, cos as bare_cos, tan as bare_tan, asin as bare_asin, acos as bare_acos, atan as bare_atan, sinh as bare_sinh, cosh as bare_cosh, tanh as bare_tanh, asinh as bare_asinh, acosh as bare_acosh, atanh as bare_atanh, abs as bare_abs, atan2 as bare_atan2, contains_periodic_point as bare_contains_periodic_point, sqr as bare_sqr, pow_interval as bare_pow_interval, exp2 as bare_exp2, exp10 as bare_exp10, log2 as bare_log2, log10 as bare_log10
 from .constants import PI, HALF_PI, TWO_PI
 from .interval import Interval
 
@@ -51,15 +51,21 @@ def log(x):
 
 def pow_int(x, n):
   x = DecoratedInterval._coerce(x)
+  try:
+    n_int = int(n)
+    if n_int != n:
+      return DecoratedInterval.new_nai()
+  except Exception:
+    return DecoratedInterval.new_nai()
   if x.is_nai:
     return DecoratedInterval.new_nai()
 
-  if n < 0 and x.interval.contains(0):
+  if n_int < 0 and x.interval.contains(0):
     op_dec = Decoration.TRV
   else:
     op_dec = Decoration.COM
 
-  interval = bare_pow_int(x.interval, n)
+  interval = bare_pow_int(x.interval, n_int)
   dec = combine(x.decoration, op_dec)
 
   if dec == Decoration.COM and not interval.is_bounded:
@@ -114,11 +120,17 @@ def interval_max(x, y):
 
 def nth_root(x, n):
   x = DecoratedInterval._coerce(x)
+  try:
+    n_int = int(n)
+    if n_int != n:
+      return DecoratedInterval.new_nai()
+  except Exception:
+    return DecoratedInterval.new_nai()
   if x.is_nai:
     return DecoratedInterval.new_nai()
-  if n <= 0:
-    raise ValueError("n must be positive")
-  if n % 2 == 1:
+  if n_int <= 0:
+    return DecoratedInterval.new_nai()
+  if n_int % 2 == 1:
     op_dec = Decoration.COM
   else:
     if x.interval.hi < 0:
@@ -127,7 +139,7 @@ def nth_root(x, n):
       op_dec = Decoration.TRV
     else:
       op_dec = Decoration.COM
-  interval = bare_nth_root(x.interval, n)
+  interval = bare_nth_root(x.interval, n_int)
   dec = combine(x.decoration, op_dec)
 
   if dec == Decoration.COM and not interval.is_bounded:
@@ -385,6 +397,78 @@ def sqr(x):
   interval = bare_sqr(x.interval)
   dec = combine(x.decoration, op_dec)
 
+  if dec == Decoration.COM and not interval.is_bounded:
+    dec = Decoration.DAC
+  return DecoratedInterval(interval, dec)
+
+def pow_interval(x, y):
+  x = DecoratedInterval._coerce(x)
+  y = DecoratedInterval._coerce(y)
+
+  if x.is_nai or y.is_nai:
+    return DecoratedInterval.new_nai()
+
+  if x.interval.lo < 0:
+    return DecoratedInterval.new_nai()
+
+  interval = bare_pow_interval(x.interval, y.interval)
+  dec = combine(x.decoration, y.decoration)
+
+  if dec == Decoration.COM and not interval.is_bounded:
+      dec = Decoration.DAC
+
+  return DecoratedInterval(interval, dec)
+
+def exp2(x):
+  x = DecoratedInterval._coerce(x)
+  if x.is_nai:
+    return DecoratedInterval.new_nai()
+  interval = bare_exp2(x.interval)
+  dec = combine(x.decoration)
+
+  if dec == Decoration.COM and not interval.is_bounded:
+    dec = Decoration.DAC
+  return DecoratedInterval(interval, dec)
+
+def exp10(x):
+  x = DecoratedInterval._coerce(x)
+  if x.is_nai:
+    return DecoratedInterval.new_nai()
+  interval = bare_exp10(x.interval)
+  dec = combine(x.decoration)
+
+  if dec == Decoration.COM and not interval.is_bounded:
+    dec = Decoration.DAC
+  return DecoratedInterval(interval, dec)
+
+def log2(x):
+  x = DecoratedInterval._coerce(x)
+  if x.is_nai:
+    return DecoratedInterval.new_nai()
+  if x.interval.hi <= 0:
+    return DecoratedInterval.empty()
+  elif x.interval.lo <= 0:
+    op_dec = Decoration.TRV
+  else:
+    op_dec = Decoration.COM
+  interval = bare_log2(x.interval)
+  dec = combine(x.decoration, op_dec)
+  if dec == Decoration.COM and not interval.is_bounded:
+    dec = Decoration.DAC
+  return DecoratedInterval(interval, dec)
+
+def log10(x):
+  x = DecoratedInterval._coerce(x)
+  if x.is_nai:
+    return DecoratedInterval.new_nai()
+  if x.interval.hi <= 0:
+    return DecoratedInterval.empty()
+  elif x.interval.lo <= 0:
+    op_dec = Decoration.TRV
+  else:
+    op_dec = Decoration.COM
+  interval = bare_log10(x.interval)
+  dec = combine(x.decoration, op_dec)
   if dec == Decoration.COM and not interval.is_bounded:
     dec = Decoration.DAC
   return DecoratedInterval(interval, dec)
