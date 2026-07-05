@@ -1,10 +1,6 @@
 from .interval import Interval
-from .rounding import add_down, add_up, sub_down, sub_up, div_down, div_up, mul_down, mul_up
+from .rounding import add_down, add_up, sub_down, sub_up, div_down, div_up, mul_down, mul_up, fma_up, fma_down
 from gmpy2 import mpfr
-
-# Without interval unions,
-# division by an interval containing zero
-# returns the entire interval.
 
 def add(x, y) -> Interval:
   x = Interval._coerce(x)
@@ -75,3 +71,16 @@ def div(x, y) -> Interval:
       return Interval.entire()
   
   return mul(x, reciprocal(y))
+
+def fma(x, y, z):
+  x = Interval._coerce(x)
+  y = Interval._coerce(y)
+  z = Interval._coerce(z)
+
+  if x.is_empty or y.is_empty or z.is_empty:
+      return Interval.empty()
+
+  v_down = [fma_down(x.lo, y.lo, z.lo), fma_down(x.lo, y.hi, z.lo), fma_down(x.hi, y.lo, z.lo), fma_down(x.hi, y.hi, z.lo)]
+  v_up = [fma_up(x.lo, y.lo, z.hi), fma_up(x.lo, y.hi, z.hi), fma_up(x.hi, y.lo, z.hi), fma_up(x.hi, y.hi, z.hi)]
+
+  return Interval(min(v_down), max(v_up))
