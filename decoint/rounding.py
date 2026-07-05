@@ -1,4 +1,4 @@
-from gmpy2 import RoundDown, RoundUp, context, get_context, exp, log, mpfr, sin, cos, asin, atan, acos, tan, sqrt, sinh, tanh, cosh, asinh, acosh, atanh, atan2, root, square
+from gmpy2 import RoundDown, RoundUp, context, get_context, exp, log, mpfr, sin, cos, asin, atan, acos, tan, sqrt, sinh, tanh, cosh, asinh, acosh, atanh, atan2, root, square, fma, exp2, exp10, log2, log10
 Number = mpfr
 
 def add_down(a, b):
@@ -240,3 +240,69 @@ def sqr_down(a):
     with context(get_context(), round = RoundDown):
         mpfr_a = Number(a)
         return square(mpfr_a)
+
+def fma_up(a, b, c):
+    with context(get_context(), round = RoundUp):
+        mpfr_a = Number(a)
+        mpfr_b = Number(b)
+        mpfr_c = Number(c)
+        return fma(mpfr_a, mpfr_b, mpfr_c)
+
+def fma_down(a, b, c):
+    with context(get_context(), round = RoundDown):
+        mpfr_a = Number(a)
+        mpfr_b = Number(b)
+        mpfr_c = Number(c)
+        return fma(mpfr_a, mpfr_b, mpfr_c)
+
+def pow_up_interval(a, n):
+    with context(get_context(), round = RoundUp):
+        mpfr_a = Number(a)
+        mpfr_n = Number(n)
+        return mpfr_a ** mpfr_n
+
+def pow_down_interval(a, n):
+    with context(get_context(), round = RoundDown):
+        mpfr_a = Number(a)
+        mpfr_n = Number(n)
+        return mpfr_a ** mpfr_n
+
+def exp2_down(a):
+    with context(get_context(), round = RoundDown):
+        mpfr_a = Number(a)
+        return exp2(mpfr_a)
+
+def exp2_up(a):
+    with context(get_context(), round = RoundUp):
+        mpfr_a = Number(a)
+        return exp2(mpfr_a)
+
+def exp10_down(a):
+    with context(get_context(), round = RoundDown):
+        mpfr_a = Number(a)
+        return exp10(mpfr_a)
+
+def exp10_up(a):
+    with context(get_context(), round = RoundUp):
+        mpfr_a = Number(a)
+        return exp10(mpfr_a)
+
+def log2_down(a):
+    with context(get_context(), round = RoundDown):
+        mpfr_a = Number(a)
+        return log2(mpfr_a)
+
+def log2_up(a):
+    with context(get_context(), round = RoundUp):
+        mpfr_a = Number(a)
+        return log2(mpfr_a)
+
+def log10_down(a):
+    with context(get_context(), round = RoundDown):
+        mpfr_a = Number(a)
+        return log10(mpfr_a)
+
+def log10_up(a):
+    with context(get_context(), round = RoundUp):
+        mpfr_a = Number(a)
+        return log10(mpfr_a)
