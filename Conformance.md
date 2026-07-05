@@ -18,13 +18,13 @@ The following table itemizes the operations and elementary functions implemented
 
 | Operation Type | Supported Functions | Conformance Status |
 | :--- | :--- | :--- |
-| **Basic Arithmetic** | `add`, `sub`, `mul`, `div`, `reciprocal`, `fma` | Fully Compliant (Directed Rounding) |
-| **Lattice / Set Ops** | `interval_min`, `interval_max` | Fully Compliant (Drops to `TRV`) |
-| **Algebraic / Powers**| `sqr`, `sqrt`, `pow_int`, `nth_root`, `pow_interval` | Fully Compliant (Domain-Protected) |
-| **Exponentials / Logs**| `exp`, `exp2`, `exp10`, `log`, `log2`, `log10` | Fully Compliant (Asymptote-Bounded) |
-| **Trigonometric** | `sin`, `cos`, `tan`, `asin`, `acos`, `atan`, `atan2` | Fully Compliant (Periodic/Singularity Truncated) |
-| **Hyperbolic** | `sinh`, `cosh`, `tanh`, `asinh`, `acosh`, `atanh` | Fully Compliant (Monotonic/Domain-Checked) |
-| **Special Primitive** | `abs`, `sign` | Fully Compliant (Drops to `TRV`) |
+| **Basic Arithmetic** | `add`, `sub`, `mul`, `div`, `reciprocal`, `fma` | Fully Compliant |
+| **Lattice / Set Ops** | `interval_min`, `interval_max` | Fully Compliant |
+| **Algebraic / Powers**| `sqr`, `sqrt`, `pow_int`, `nth_root`, `pow_interval` | Fully Compliant |
+| **Exponentials / Logs**| `exp`, `exp2`, `exp10`, `log`, `log2`, `log10` | Fully Compliant |
+| **Trigonometric** | `sin`, `cos`, `tan`, `asin`, `acos`, `atan`, `atan2` | Fully Compliant |
+| **Hyperbolic** | `sinh`, `cosh`, `tanh`, `asinh`, `acosh`, `atanh` | Fully Compliant |
+| **Special Primitive** | `abs`, `sign` | Fully Compliant |
 
 ---
 
@@ -33,4 +33,3 @@ The following table itemizes the operations and elementary functions implemented
 * **Exception-Free Execution:** In compliance with the standard, out-of-domain calculations avoid standard runtime panics or hard crashes. Operations that are completely out-of-domain (e.g., `log` of a strictly negative range) return a valid empty set interval, while structural execution failures or uninitialized data safely propagate as a NaI state.
 * **Lattice Decoration Tracking:** The library tracks continuous metadata updates across the standard's ordinal decoration hierarchy (`COM` $\succ$ `DAC` $\succ$ `DEF` $\succ$ `TRV`). Incoming decorations are systematically merged using a `combine()` function that extracts the weakest common state.
 * **Automatic Decoration Demotion:** Operations that cross unbounded asymptotes or hit infinities automatically downgrade from `COM` to `DAC` if the underlying bare interval becomes unbounded.
-* **Set-Theoretic Decoration Drops:** Functions mutating continuous domains into discrete boundaries (such as `interval_min`, `interval_max`, `abs`, `sign`, or empty set reductions) unconditionally downlevel the resulting metadata state to `TRV` to flag the termination of continuous function tracking.
