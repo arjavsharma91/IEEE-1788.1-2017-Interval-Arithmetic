@@ -3,14 +3,14 @@ from .decorated_interval import DecoratedInterval
 from .decorations import Decoration
 
 # 2. Fully Tracked Core Arithmetic (Using your decorated module)
-from .decorated_arithmetic import add, sub, mul, div, reciprocal
+from .decorated_arithmetic import add, sub, mul, div, reciprocal, fma
 
 # 3. Tracked Elementary Functions 
 from .decorated_functions import (
     exp, log, sqrt, pow_int, sign, 
     sin, cos, tan, asin, acos, atan, 
     sinh, cosh, tanh, asinh, acosh, atanh, 
-    abs, atan2, interval_min, interval_max, nth_root, sqr
+    abs, atan2, interval_min, interval_max, nth_root, sqr, pow_interval, exp2, exp10, log2, log10
 )
 
 __all__ = [
@@ -19,5 +19,5 @@ __all__ = [
     'exp', 'log', 'sqrt', 'pow_int', 'sign',
     'sin', 'cos', 'tan', 'asin', 'acos', 'atan',
     'sinh', 'cosh', 'tanh', 'asinh', 'acosh', 'atanh',
-    'abs', 'atan2', 'interval_min', 'interval_max', 'nth_root', 'sqr'
+    'abs', 'atan2', 'interval_min', 'interval_max', 'nth_root', 'sqr', 'fma', 'pow_interval', 'exp2', 'exp10', 'log2', 'log10'
 ]
