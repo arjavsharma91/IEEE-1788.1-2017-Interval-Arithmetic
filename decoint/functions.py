@@ -1,5 +1,5 @@
 from .interval import Interval
-from .rounding import add_up, add_down, sub_up, sub_down, mul_up, mul_down, div_up, div_down, sqrt_up, sqrt_down, exp_down, exp_up, log_up, log_down, pow_up, pow_down, root_up, root_down, sin_up, sin_down, tan_up, tan_down, asin_up, asin_down, acos_up, acos_down, atan_up, atan_down, sinh_up, sinh_down, cosh_up, cosh_down, tanh_up, tanh_down, atanh_up, atanh_down, asinh_up, asinh_down, acosh_up, acosh_down, cos_up, cos_down, sqr_up, sqr_down
+from .rounding import add_up, add_down, sub_up, sub_down, mul_up, mul_down, div_up, div_down, sqrt_up, sqrt_down, exp_down, exp_up, log_up, log_down, pow_up, pow_down, root_up, root_down, sin_up, sin_down, tan_up, tan_down, asin_up, asin_down, acos_up, acos_down, atan_up, atan_down, sinh_up, sinh_down, cosh_up, cosh_down, tanh_up, tanh_down, atanh_up, atanh_down, asinh_up, asinh_down, acosh_up, acosh_down, cos_up, cos_down, sqr_up, sqr_down, pow_down_interval, pow_up_interval, exp2_up, exp2_down, log2_up, log2_down, exp10_up, exp10_down, log10_up, log10_down
 from gmpy2 import mpfr, floor, ceil
 from .arithmetic import reciprocal
 from .constants import PI, TWO_PI, HALF_PI
@@ -39,30 +39,36 @@ def pow_int(x, n):
   x = Interval._coerce(x)
   if x.is_empty:
     return Interval.empty()
-  if n == 0:
+  try:
+    n_int = int(n)
+    if n_int != n:
+      return Interval(mpfr('nan'), mpfr('nan'))
+  except Exception:
+    return Interval(mpfr('nan'), mpfr('nan'))
+  if n_int == 0:
     return Interval(mpfr(1), mpfr(1))
-  if n < 0:
-    return reciprocal(pow_int(x, -n))
-  if n % 2 == 1:
-    lo = pow_down(x.lo, n)
-    hi = pow_up(x.hi, n)
+  if n_int < 0:
+    return reciprocal(pow_int(x, -n_int))
+  if n_int % 2 == 1:
+    lo = pow_down(x.lo, n_int)
+    hi = pow_up(x.hi, n_int)
     return Interval(lo, hi)
-  if n % 2 == 0:
+  if n_int % 2 == 0:
     if x.lo >= 0:
-      lo = pow_down(x.lo, n)
-      hi = pow_up(x.hi, n)
+      lo = pow_down(x.lo, n_int)
+      hi = pow_up(x.hi, n_int)
       return Interval(lo, hi)
     if x.hi <= 0:
       hi_sub = builtins.abs(x.hi)
       lo_sub = builtins.abs(x.lo)
-      lo = pow_down(hi_sub, n)
-      hi = pow_up(lo_sub, n)
+      lo = pow_down(hi_sub, n_int)
+      hi = pow_up(lo_sub, n_int)
       return Interval(lo, hi)
     hi_sub = builtins.abs(x.hi)
     lo_sub = builtins.abs(x.lo)
     hi = max(
-    pow_up(hi_sub, n),
-    pow_up(lo_sub, n)
+    pow_up(hi_sub, n_int),
+    pow_up(lo_sub, n_int)
     )
     return Interval(mpfr(0), hi)
 
@@ -92,22 +98,29 @@ def interval_min(x, y) -> Interval:
 def interval_max(x, y) -> Interval:
   x = Interval._coerce(x)
   y = Interval._coerce(y)
+  
   if x.is_empty or y.is_empty:
     return Interval.empty()
   return Interval(max(x.lo, y.lo), max(x.hi, y.hi))
   
 def nth_root(x, n) -> Interval:
   x = Interval._coerce(x)
-  if n <= 0:
-    raise ValueError("n must be positive")
+  try:
+    n_int = int(n)
+    if n_int != n:
+      return Interval(mpfr('nan'), mpfr('nan'))
+  except Exception:
+    return Interval(mpfr('nan'), mpfr('nan'))
+  if n_int <= 0:
+    return Interval(mpfr('nan'), mpfr('nan'))
   if x.is_empty:
     return Interval.empty()
-  if n % 2 == 1:
+  if n_int % 2 == 1:
     return Interval(root_down(x.lo, n), root_up(x.hi, n))
   if x.hi < 0:
     return Interval.empty()
   lo = max(x.lo, mpfr(0))
-  return Interval(root_down(lo, n), root_up(x.hi, n))
+  return Interval(root_down(lo, n_int), root_up(x.hi, n_int))
 
 def contains_periodic_point(x, offset, period):
   lower = div_down(sub_down(x.lo, offset), period)
@@ -298,3 +311,59 @@ def sqr(x):
   hi = max(sqr_up(builtins.abs(x.hi)), sqr_up(builtins.abs(x.lo)))
   return Interval(mpfr(0), hi)
 
+def pow_interval(x, y):
+  x = Interval._coerce(x)
+  y = Interval._coerce(y)
+
+  if x.is_empty or y.is_empty:
+    return Interval.empty()
+
+  if x.lo < 0:
+    return Interval(mpfr('nan'), mpfr('nan'))
+  
+  v_down = [pow_down_interval(x.lo, y.lo), pow_down_interval(x.lo, y.hi), pow_down_interval(x.hi, y.lo), pow_down_interval(x.hi, y.hi)]
+  v_up = [pow_up_interval(x.lo, y.lo), pow_up_interval(x.lo, y.hi), pow_up_interval(x.hi, y.lo), pow_up_interval(x.hi, y.hi)]
+
+  return Interval(min(v_down), max(v_up))
+
+def exp2(x):
+  x = Interval._coerce(x)
+  
+  if x.is_empty:
+    return Interval.empty()
+
+  return Interval(exp2_down(x.lo), exp2_up(x.hi))
+
+def exp10(x):
+  x = Interval._coerce(x)
+  
+  if x.is_empty:
+    return Interval.empty()
+
+  return Interval(exp10_down(x.lo), exp10_up(x.hi))
+
+def log2(x):
+  x = Interval._coerce(x)
+  if x.is_empty:
+    return Interval.empty()
+  if x.hi <= 0:
+    return Interval.empty()
+  if x.lo <= 0:
+    lo = mpfr('-inf')
+  else:
+    lo = log2_down(x.lo)
+  hi = log2_up(x.hi)
+  return Interval(lo, hi)
+
+def log10(x):
+  x = Interval._coerce(x)
+  if x.is_empty:
+    return Interval.empty()
+  if x.hi <= 0:
+    return Interval.empty()
+  if x.lo <= 0:
+    lo = mpfr('-inf')
+  else:
+    lo = log10_down(x.lo)
+  hi = log10_up(x.hi)
+  return Interval(lo, hi)
