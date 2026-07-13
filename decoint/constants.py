@@ -1,5 +1,6 @@
-from gmpy2 import const_pi
+from gmpy2 import const_pi, context, get_context
 
-PI = const_pi()
-TWO_PI = 2 * PI
-HALF_PI = PI / 2
+with context(get_context(), precision = 128):
+    PI = const_pi()
+    HALF_PI = PI / 2
+    TWO_PI = PI * 2
