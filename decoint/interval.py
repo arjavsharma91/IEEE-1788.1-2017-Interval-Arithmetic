@@ -1,7 +1,12 @@
 from dataclasses import dataclass
-from gmpy2 import mpfr, RoundUp, RoundDown, context, get_context, is_nan
+from gmpy2 import mpfr, RoundUp, RoundDown, context, get_context, is_nan, is_infinite, next_below
 import re
 from typing import Tuple
+
+ctx = get_context()
+ctx.precision = 53
+ctx.emin = -1074
+ctx.emax = 1024
 
 BOX_REGEX = re.compile(r"^\[\s*([^,;\]]+?)\s*(?:[,;]\s*([^,;\]]*?))?\s*\]$")
 UNC_REGEX = re.compile(r"^([^?]+)\?(.*)$")
@@ -9,21 +14,44 @@ UNC_REGEX = re.compile(r"^([^?]+)\?(.*)$")
 Number = mpfr
 @dataclass(frozen = True)
 class Interval:
-    lo: Number
-    hi: Number
+    lo: Number = Number('-inf')
+    hi: Number = Number('inf')
 
     def __post_init__(self):
+
+        if isinstance(self.lo, str):
+            parsed_interval = Interval.from_string(self.lo)
+            if not (is_nan(parsed_interval.lo) or is_nan(parsed_interval.hi)):
+                object.__setattr__(self, "lo", parsed_interval.lo)
+                object.__setattr__(self, "hi", parsed_interval.hi)
+            else:
+                pass
+                
+        
         with context(get_context(), round=RoundDown):
             lo = Number(self.lo)
         with context(get_context(), round=RoundUp):
             hi = Number(self.hi)
 
         if lo > hi:
-            lo = Number('inf')
-            hi = Number('-inf')
+            object.__setattr__(self, "lo", Number('inf'))
+            object.__setattr__(self, "hi", Number('-inf'))
 
-        object.__setattr__(self, "lo", lo)
-        object.__setattr__(self, "hi", hi)
+        if is_nan(lo) or is_nan(hi):
+            object.__setattr__(self, "lo", Number('NaN'))
+            object.__setattr__(self, "hi", Number('NaN'))
+        
+        elif lo == Number('-inf') and hi == Number('-inf'):
+            object.__setattr__(self, "lo", Number('NaN'))
+            object.__setattr__(self, "hi", Number('NaN'))
+        
+        elif lo == Number('inf') and hi == Number('inf'):
+            object.__setattr__(self, "lo", Number('NaN'))
+            object.__setattr__(self, "hi", Number('NaN'))
+
+        else:
+            object.__setattr__(self, "lo", lo)
+            object.__setattr__(self, "hi", hi)
 
     @classmethod
     def empty(cls):
@@ -38,6 +66,8 @@ class Interval:
             return value
         if isinstance(value, str):
             return cls.from_string(value)
+        if hasattr(value, "interval"):
+            return value.interval
         return cls(value, value)
 
     @classmethod
@@ -66,7 +96,7 @@ class Interval:
             lo, hi = cls._parse_uncertainty(content)
             return cls(lo, hi)
 
-        raise ValueError(f"Invalid interval string format: {s}")
+        return Interval(Number('nan'), Number('nan'))
 
     @classmethod 
     def _parse_bound(cls, s: str, round_up: bool):
@@ -117,6 +147,8 @@ class Interval:
         if '.' in center_str and not check_str.startswith('0x'):
             dec_digits = len(center_str.split('.')[1])
 
+        # DIRECTION FIX 1: Detect 'u' and 'd' flags, then strip them so 
+        # "5ue-5" becomes "5e-5" for clean exponent splitting.
         is_upper_only = 'u' in unc_str_lower
         is_lower_only = 'd' in unc_str_lower
         if is_upper_only:
@@ -126,8 +158,10 @@ class Interval:
 
         unc_str_lower = unc_str_lower.strip()
 
-
+        # --- UPPER BOUND (hi) ---
         if is_lower_only:
+            # DIRECTION FIX 2: If 'd' was present, upper bound is locked to the center value 
+            # scaled by the exponent (e.g., 2.5 * 10^-5). No tolerance is added.
             with context(get_context(), round = RoundUp):
                 hi = Number(center_str)
                 if 'e' in unc_str_lower:
@@ -135,13 +169,14 @@ class Interval:
                     scale_factor = Number(10) ** int(exp_part)
                     hi = hi * scale_factor
         else:
+            # Standard upper bound (adds tolerance + center scaled by exponent)
             with context(get_context(), round = RoundUp):
                 mid_hi = Number(center_str)
                 if not unc_str_lower:
-                    tol_hi = Number(10) ** (-dec_digits)
+                    tol_hi = Number('0.5') * (Number(10) ** (-dec_digits))
                 elif 'e' in unc_str_lower:
                     unc_digits, exp_part = unc_str_lower.split('e')
-                    u_val = Number(unc_digits) if unc_digits else Number(1)
+                    u_val = Number(unc_digits) if unc_digits else Number('0.5')
                     base_tol = u_val * (Number(10) ** (-dec_digits))
                     scale_factor = Number(10) ** int(exp_part)
                     mid_hi = mid_hi * scale_factor
@@ -151,31 +186,38 @@ class Interval:
 
                 hi = mid_hi + tol_hi
 
+        # --- LOWER BOUND (lo) ---
         if is_upper_only:
+            # DIRECTION FIX 3: If 'u' was present, lower bound is locked to the center value 
+            # scaled by the exponent (e.g., 2.5 * 10^-5). No tolerance is subtracted.
+            with context(get_context(), round = RoundDown):
+                mid_lo = Number(center_str)
+                if 'e' in unc_str_lower:
+                    _, exp_part = unc_str_lower.split('e')
+                    scale_factor = (Number(10) ** int(exp_part))
+                    mid_lo = mid_lo * scale_factor
+                lo = mid_lo
+        else:
+            # Standard lower bound (subtracts tolerance)
+            with context(get_context(), round = RoundUp):
+                if not unc_str_lower:
+                    tol_lo = Number('0.5') * (Number(10) ** (-dec_digits))
+                elif 'e' in unc_str_lower:
+                    unc_digits, exp_part = unc_str_lower.split('e')
+                    u_val = Number(unc_digits) if unc_digits else Number('0.5')
+                    base_tol = u_val * (Number(10) ** (-dec_digits))
+                    scale_factor = Number(10) ** int(exp_part)
+                    tol_lo = base_tol * scale_factor
+                else:
+                    tol_lo = Number(unc_str_lower) * (Number(10) ** (-dec_digits))
+
             with context(get_context(), round = RoundDown):
                 mid_lo = Number(center_str)
                 if 'e' in unc_str_lower:
                     _, exp_part = unc_str_lower.split('e')
                     scale_factor = Number(10) ** int(exp_part)
                     mid_lo = mid_lo * scale_factor
-                lo = mid_lo
-        else:
-            with context(get_context(), round = RoundDown):
-                mid_lo = Number(center_str)
-            with context(get_context(), round = RoundUp):
-                if not unc_str_lower:
-                    tol_lo = Number(10) ** (-dec_digits)
-                elif 'e' in unc_str_lower:
-                    unc_digits, exp_part = unc_str_lower.split('e')
-                    u_val = Number(unc_digits) if unc_digits else Number(1)
-                    base_tol = u_val * (Number(10) ** (-dec_digits))
-                    scale_factor = Number(10) ** int(exp_part)
-                    with context(get_context(), round = RoundDown):
-                        mid_lo = mid_lo * scale_factor
-                    tol_lo = base_tol * scale_factor
-                else:
-                    tol_lo = Number(unc_str_lower) * (Number(10) ** (-dec_digits))
-            with context(get_context(), round = RoundDown):
+
                 lo = mid_lo - tol_lo
         
         return lo, hi
@@ -184,7 +226,9 @@ class Interval:
     
     @property
     def is_common(self):
-        return not self.is_empty and self.is_bounded
+        if not is_nan(self.lo) and self.is_bounded and not self.is_empty:
+            return True
+        return False
     
     @property
     def is_empty(self):
@@ -199,13 +243,13 @@ class Interval:
         return not self.is_empty and self.lo != Number('-inf') and self.hi != Number('inf')
 
     @property
-    def is_point(self):
+    def is_singleton(self):
         return not self.is_empty and self.lo == self.hi
     
     @property
     def width(self):
         if self.is_empty:
-            return Number(0)
+            return Number('nan')
         if not self.is_bounded:
             return Number('inf')
         with context(get_context()) as ctx:
@@ -215,23 +259,28 @@ class Interval:
     @property
     def radius(self):
         if self.is_empty:
-            return Number(0)
+            return Number('nan')
         if not self.is_bounded:
             return Number('inf')
 
-        with context(get_context()) as ctx:
-            ctx.round = RoundUp
-            return (self.hi - self.lo) / 2
+        m = self.midpoint
+        with context(get_context(), round = RoundUp):
+            d_lo = m - self.lo
+            d_hi = self.hi - m
+            return max(d_lo, d_hi)
 
     @property
     def midpoint(self):
         if self.is_empty:
             return Number("nan")
-        if self.is_entire:
+        lo, hi = self.lo, self.hi
+        if self.is_entire or (is_infinite(lo) and is_infinite(hi)):
             return Number(0)
-        with context(get_context()) as ctx:
-            ctx.round = RoundNearest
-            return self.lo + (self.hi - self.lo) / 2
+        if is_infinite(lo):
+            return Number(next_below(Number("-inf")))
+        if is_infinite(hi):
+            return Number(next_below(Number("inf")))
+        return (lo / 2) + (hi / 2)
 
     @property
     def magnitude(self):
@@ -253,6 +302,8 @@ class Interval:
         except Exception:
             return False
         if self.is_empty:
+            return False
+        if is_infinite(x):
             return False
         return self.lo <= x <= self.hi
 
@@ -321,22 +372,23 @@ class Interval:
             return False
         return self.lo < x < self.hi
 
-    def interior_subset(self, other):
+    def interior(self, other):
         if not isinstance(other, Interval):
             return False
         if self.is_empty:
             return True
         if other.is_empty:
             return False
+        if self.is_entire and other.is_entire:
+            return True
 
         return other.lo < self.lo and self.hi < other.hi
 
     def precedes(self, other):
-        if not isinstance(other, Interval):
-            return False
+        other = self._coerce(other)
         if self.is_empty or other.is_empty:
-            return False
-        return self.hi < other.lo
+            return True
+        return self.hi <= other.lo
 
     def meets(self, other):
         if not isinstance(other, Interval):
@@ -425,26 +477,31 @@ class Interval:
         if self.is_empty and other.is_empty:
             return True
         return self.lo == other.lo and self.hi == other.hi
+    
     def __lt__(self, other):
-        if not isinstance(other, Interval):
-            other = self._coerce(other)
+        other = self._coerce(other)
+        if self.is_empty and other.is_empty:
+            return True
         if self.is_empty or other.is_empty:
             return False
-        return self.hi < other.lo
+        return self.lo <= other.lo and self.hi <= other.hi
 
     def __gt__(self, other):
         if not isinstance(other, Interval):
             other = self._coerce(other)
         if self.is_empty or other.is_empty:
             return False
-        return self.lo > other.hi
+        return self.lo >= other.lo and self.hi >= other.hi
 
-    def possibly_less_than(self, other):
-        if not isinstance(other, Interval):
-            other = self._coerce(other)
-        if self.is_empty or other.is_empty:
+    def strictly_less_than(self, other):
+        other = self._coerce(other)
+        if self.is_empty and other.is_empty:
+            return True
+        if self.is_entire and other.is_entire:
+            return True
+        if other.is_empty or self.is_empty:
             return False
-        return self.lo <= other.hi
+        return self.lo < other.lo and self.hi < other.hi
 
     def bisect(self):
         if self.is_empty:
@@ -468,3 +525,22 @@ class Interval:
         with context(get_context()) as ctx:
             ctx.round = RoundUp
             return self.hi - other.hi
+
+    def strictly_precedes(self, other):
+        other = self._coerce(other)
+        if self.is_empty or other.is_empty:
+            return True
+        return self.hi < other.lo
+
+    def __neg__(self):
+        if self.is_empty:
+            return self
+        if self.is_entire:
+            return self
+        return Interval(-self.hi, -self.lo)
+
+    def inf(self):
+        return self.lo
+
+    def sup(self):
+        return self.hi
