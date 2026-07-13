@@ -68,16 +68,13 @@ def div(x, y):
   if x.is_nai or y.is_nai:
     return DecoratedInterval.new_nai()
 
+  if x.is_empty or y.is_empty:
+    return DecoratedInterval.empty()
+
   if y.interval.contains(0):
-    if y.interval.lo < 0 and y.interval.hi > 0:
-      return DecoratedInterval(Interval.entire(), Decoration.TRV)
-    elif x.interval.contains(0):
-      return DecoratedInterval(Interval.entire(), Decoration.TRV)
-    else:
       interval = bare_div(x.interval, y.interval)
-      dec = combine(x.decoration, y.decoration, Decoration.DEF)
-      dec = _finalize_decoration(dec, interval)
-      return DecoratedInterval(interval, dec)
+      dec = combine(x.decoration, y.decoration, Decoration.TRV)
+      return DecoratedInterval(interval, Decoration.TRV)
 
   interval = bare_div(x.interval, y.interval)
   dec = combine(x.decoration, y.decoration)
