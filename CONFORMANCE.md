@@ -26,6 +26,9 @@ The following table itemizes the operations and elementary functions implemented
 | **Hyperbolic** | `sinh`, `cosh`, `tanh`, `asinh`, `acosh`, `atanh` | Fully Compliant |
 | **Special Primitive** | `abs`, `sign`, `interval_trunc`, `interval_floor`, `interval_ceil` | Fully Compliant |
 | **Set Operations** | `hull`, `intersection` | Fully Compliant |
+| **Unary Boolean Properties** | `is_empty`, `is_common`, `is_entire`, `is_bounded`, `is_singleton` | Fully Compliant |
+| **Unary Properties** | `width`, `radius`, `midpoint`, `magnitude`, `mignitude`, `inf`, `sup` | Fully Compliant |
+| **Set Relations** | `subset`, `contains`, `proper_subset`, `overlaps`, `disjoint`, `interior`, `precedes`, `meets` | Fully Compliant |
 
 ---
 
