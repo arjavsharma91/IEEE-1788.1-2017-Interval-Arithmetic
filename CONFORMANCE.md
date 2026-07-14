@@ -21,15 +21,14 @@ The following table itemizes the operations and elementary functions implemented
 | **Basic Arithmetic** | `add`, `sub`, `mul`, `div`, `reciprocal`, `fma` | Fully Compliant |
 | **Lattice / Set Ops** | `interval_min`, `interval_max` | Fully Compliant |
 | **Algebraic / Powers**| `sqr`, `sqrt`, `pow_int`, `nth_root`, `pow_interval` | Fully Compliant |
-| **Exponentials / Logs**| `exp`, `exp2`, `exp10`, `log`, `log2`, `log10` | Fully Compliant |
+| **Exponentials / Logs**| `exp`, `exp2`, `exp10`, `log`, `log2`, `log10`, `sqr` | Fully Compliant |
 | **Trigonometric** | `sin`, `cos`, `tan`, `asin`, `acos`, `atan`, `atan2` | Fully Compliant |
 | **Hyperbolic** | `sinh`, `cosh`, `tanh`, `asinh`, `acosh`, `atanh` | Fully Compliant |
-| **Special Primitive** | `abs`, `sign` | Fully Compliant |
+| **Special Primitive** | `abs`, `sign`, `interval_trunc`, `interval_floor`, `interval_ceil` | Fully Compliant |
 
 ---
 
 ## 3. Exception Handling & Interval Decorations
 
-* **Exception-Free Execution:** In compliance with the standard, out-of-domain calculations avoid standard runtime errors. Operations that are completely out-of-domain (e.g., `log` of a strictly negative range) return a valid empty set interval, while structural execution failures or uninitialized data safely propagate as a NaI state.
+* **Exception-Free Execution:** In compliance with the standard, structural failures of the library safely propagate to an NAI state rather than throwing a runtime error.
 * **Lattice Decoration Tracking:** The library tracks continuous metadata updates across the standard's ordinal decoration hierarchy (`COM` $\succ$ `DAC` $\succ$ `DEF` $\succ$ `TRV` $\succ$ `ILL`). Incoming decorations are systematically merged using a `combine()` function that extracts the weakest common state.
-* **Automatic Decoration Demotion:** Operations that cross unbounded asymptotes or hit infinities automatically downgrade from `COM` to `DAC` if the underlying bare interval becomes unbounded.
