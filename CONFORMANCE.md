@@ -30,6 +30,6 @@ The following table itemizes the operations and elementary functions implemented
 
 ## 3. Exception Handling & Interval Decorations
 
-* **Exception-Free Execution:** In compliance with the standard, out-of-domain calculations avoid standard runtime panics or hard crashes. Operations that are completely out-of-domain (e.g., `log` of a strictly negative range) return a valid empty set interval, while structural execution failures or uninitialized data safely propagate as a NaI state.
+* **Exception-Free Execution:** In compliance with the standard, out-of-domain calculations avoid standard runtime errors. Operations that are completely out-of-domain (e.g., `log` of a strictly negative range) return a valid empty set interval, while structural execution failures or uninitialized data safely propagate as a NaI state.
 * **Lattice Decoration Tracking:** The library tracks continuous metadata updates across the standard's ordinal decoration hierarchy (`COM` $\succ$ `DAC` $\succ$ `DEF` $\succ$ `TRV` $\succ$ `ILL`). Incoming decorations are systematically merged using a `combine()` function that extracts the weakest common state.
 * **Automatic Decoration Demotion:** Operations that cross unbounded asymptotes or hit infinities automatically downgrade from `COM` to `DAC` if the underlying bare interval becomes unbounded.
