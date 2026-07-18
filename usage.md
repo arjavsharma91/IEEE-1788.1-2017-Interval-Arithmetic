@@ -125,6 +125,8 @@ di2 = DecoratedInterval(base_interval, decoration=Decoration.DAC)
 
 If an evaluation failure, syntax error, or a similar exceptional issue occurs during execution, the resulting interval will automatically drop to an `NAI` (Not an Interval) state.
 
+---
+
 ## 5. Operation Syntax
 
 `decoint` supports standard, intuitive Python arithmetic operators for both `Interval` and `DecoratedInterval` instances. Basic operations like addition, subtraction, multiplication, and division do not require calling verbose internal methods; they map directly to Python's built-in magic methods.
@@ -205,4 +207,30 @@ from decoint import Interval, pow_interval
 
 # Raise an interval base to an interval exponent
 res_pow_intv = pow_interval(Interval(1, 2), Interval(3, 4))
+```
+
+---
+
+## 7. Exponential and Logarithmic Operations
+
+`decoint` offers robust tracking for standard transcendental functions. Because all exponential and logarithmic functions are strictly monotonic, the mathematical bounds map directly without complex internal branching. 
+
+All functions listed below are **unary operators** and accept either an `Interval` or `DecoratedInterval` as their single argument. For log functions, omitting a numeric suffix defaults safely to the natural logarithm (base e).
+
+### Supported Transcendental Operators
+* **Exponentials:** `exp` (base e), `exp2` (base 2), and `exp10` (base 10)
+* **Logarithms:** `log` (natural log, base e), `log2` (base 2), and `log10` (base 10)
+
+```python
+from decoint import Interval, exp, exp2, exp10, log, log2, log10
+
+# Exponential Operations
+e_power   = exp(Interval(1, 2))     # Base e exponential
+two_power = exp2(Interval(1, 2))    # Base 2 exponential -> [2.0, 4.0]
+ten_power = exp10(Interval(1, 2))   # Base 10 exponential -> [10.0, 100.0]
+
+# Logarithmic Operations
+nat_log   = log(Interval(1, 2))     # Natural logarithm (base e)
+base2_log = log2(Interval(2, 4))    # Base 2 logarithm -> [1.0, 2.0]
+base10_log= log10(Interval(10, 100))# Base 10 logarithm -> [1.0, 2.0]
 ```
