@@ -124,3 +124,39 @@ di2 = DecoratedInterval(base_interval, decoration=Decoration.DAC)
 ```
 
 If an evaluation failure, syntax error, or a similar exceptional issue occurs during execution, the resulting interval will automatically drop to an `NAI` (Not an Interval) state.
+
+## 5. Operation Syntax
+
+`decoint` supports standard, intuitive Python arithmetic operators for both `Interval` and `DecoratedInterval` instances. Basic operations like addition, subtraction, multiplication, and division do not require calling verbose internal methods; they map directly to Python's built-in magic methods.
+
+### Supported Arithmetic Operators
+* **Addition:** `+`
+* **Subtraction:** `-`
+* **Multiplication:** `*`
+* **Division:** `/`
+
+```python
+from decoint import Interval, DecoratedInterval
+
+# Standard Interval Arithmetic
+i1 = Interval(1, 2)
+i2 = Interval(3, 4)
+
+# Operations can be performed using regular operators
+add_res = i1 + i2  # Evaluates to [4, 6]
+sub_res = i1 - i2  # Evaluates to [-3, -1]
+mul_res = i1 * i2  # Evaluates to [3, 8]
+div_res = i1 / i2  # Evaluates to [0.25, 0.66666...]
+
+# Arithmetic also works with mixed valid types (like raw integers)
+scale_res = i1 * 5  # Evaluates to [5, 10]
+
+# Decorated Interval Arithmetic
+# Tracking rules and decorations propagate through the operators automatically
+di1 = DecoratedInterval(Interval("1.0", "2.0"))
+di2 = DecoratedInterval(Interval("3.0", "4.0"))
+
+decorated_add = di1 + di2
+```
+
+---
