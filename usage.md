@@ -1,4 +1,4 @@
-Here is the complete content of the file. You can select all the text inside this box, copy it, and paste it directly into your usage.md file:Markdown# Usage Guide: Handling Precision and Numeric Inputs
+# Usage Guide: Handling Precision and Numeric Inputs
 
 To ensure the mathematical rigor and strict standard compliance of `decoint`, it is critical to understand how Python handles numeric types before they are passed into the interval engine.
 
@@ -14,12 +14,39 @@ invalid = Interval(1.1)
 
 # ✅ RECOMMENDED: High-precision parsing preserves exact decimal intent
 valid = Interval("1.1")
-Why This MattersBecause decoint is built on top of gmpy2 (leveraging the arbitrary-precision MPFR library), it is capable of tracking exact mathematical boundaries using directed rounding modes. However, if you pass a standard Python float like 1.1, the precision loss occurs before your library ever sees the data:Immediate Base-2 Approximation: Python immediately converts the literal 1.1 into a standard binary64 hardware float. Because $1.1$ cannot be exactly represented in binary, it becomes 1.10000000000000008881784....Imprecise Bounding: gmpy2 reads that already-imprecise float, causing the interval bounds to tightly wrap around a corrupted value rather than the exact fractional value of $\frac{11}{10}$.By passing a string representation ("1.1"), gmpy2 parses the exact decimal characters directly into arbitrary precision, allowing decoint to apply strict IEEE 1788.1-2017 directed rounding rules (rounding downward for the lower bound and upward for the upper bound) from the true intended value.When are Raw Numbers Safe?You can safely pass raw integers or fractions that have exact binary representations:Python# Safe: Integers have exact representations
+```
+
+### Why This Matters
+
+Because `decoint` is built on top of `gmpy2` (leveraging the arbitrary-precision MPFR library), it is capable of tracking exact mathematical boundaries using directed rounding modes. However, if you pass a standard Python float like `1.1`, the precision loss occurs **before** your library ever sees the data:
+
+1. **Immediate Base-2 Approximation:** Python immediately converts the literal `1.1` into a standard `binary64` hardware float. Because 1.1 cannot be exactly represented in binary, it becomes `1.10000000000000008881784...`.
+2. **Imprecise Bounding:** `gmpy2` reads that already-imprecise float, causing the interval bounds to tightly wrap around a corrupted value rather than the exact fractional value of 11/10.
+
+By passing a string representation (`"1.1"`), `gmpy2` parses the exact decimal characters directly into arbitrary precision, allowing `decoint` to apply strict IEEE 1788.1-2017 directed rounding rules (rounding downward for the lower bound and upward for the upper bound) from the true intended value.
+
+### When are Raw Numbers Safe?
+
+You can safely pass raw integers or fractions that have exact binary representations:
+
+```python
+# Safe: Integers have exact representations
 int_interval = Interval(5)
 
 # Safe: Powers of 2 (e.g., 0.5 = 1/2) have exact binary representations
 float_exact = Interval(0.5)
-For any other decimal values, always default to string literals to maintain the mathematical integrity of your interval simulations.2. Basic Interval InitializationA standard interval represents a closed, connected set of real numbers $[a, b]$ where $a \le b$. You can define them by passing the lower and upper bounds independently.Pythonfrom decoint import Interval
+```
+
+For any other decimal values, always default to string literals to maintain the mathematical integrity of your interval simulations.
+
+---
+
+## 2. Basic `Interval` Initialization
+
+ A standard interval represents a closed, connected set of real numbers [a, b] where a ≤ b. You can define them by passing the lower and upper bounds independently.
+
+```python
+from decoint import Interval
 
 # Initialize using exact decimal string literals (Highly Recommended)
 a = Interval("-1.5", "2.3")
@@ -27,16 +54,63 @@ a = Interval("-1.5", "2.3")
 # Initialize using exact integers or binary-exact floats
 b = Interval(1, 5)          # [1, 5]
 c = Interval("0.5")         # A point interval: [0.5, 0.5]
-3. Parsing Interval Strings and Uncertainty Formatsdecoint can also instantiate intervals directly from a single string representation. This is highly useful when parsing data from experimental logs, configuration files, or user inputs.Bound-Style StringsYou can pass a single string enclosed in brackets that defines both the lower and upper bounds explicitly:Python# Parse standard bracket notation
+```
+
+---
+
+## 3. Parsing Interval Strings and Uncertainty Formats
+
+`decoint` can also instantiate intervals directly from a single string representation. This is highly useful when parsing data from experimental logs, configuration files, or user inputs.
+
+### Bound-Style Strings
+You can pass a single string enclosed in brackets that defines both the lower and upper bounds explicitly:
+
+```python
+# Parse standard bracket notation
 val = Interval("[2.1, 3.1]")  # Evaluates to an interval from 2.1 to 3.1
-Custom Uncertainty / Error-Margin FormatsIn scientific workflows, asymmetric or directional experimental tolerances are common. decoint natively parses a strict, character-separated uncertainty syntax directly into exact mathematical intervals.The notation follows this exact structure:[Sign][Integer Part].[Fractional Part]?[Uncertainty Value][Direction Token][Exponent Token][Sign] (Optional): Explicit positive (+) or negative (-) indicator for the nominal value.[Integer Part].[Fractional Part] (Mandatory): The nominal value written as a standard decimal number.? (Mandatory Separator): Flags the transition from the nominal value to the uncertainty parameters.[Uncertainty Value] (Mandatory): An integer that aligns directly with the least significant digit (the very last digit) of the fractional part to define the magnitude of the error.[Direction Token] (Mandatory): A single character defining the one-sided boundary:u (Up): The nominal value is the absolute floor. True value is in the range $[\text{Nominal}, \text{Nominal} + \text{Uncertainty}]$.d (Down): The nominal value is the absolute ceiling. True value is in the range $[\text{Nominal} - \text{Uncertainty}, \text{Nominal}]$.[Exponent Token] (Optional): Expressed as e or E followed by an integer, representing a scientific notation multiplier ($10^{\text{exponent}}$).Python# Upward uncertainty: Base 1.23, error magnitude 4 at the hundredths place (+0.04)
+```
+
+### Custom Uncertainty / Error-Margin Formats
+In scientific workflows, asymmetric or directional experimental tolerances are common. `decoint` natively parses a strict, character-separated uncertainty syntax directly into exact mathematical intervals. 
+
+The notation follows this exact structure:  
+`[Sign][Integer Part].[Fractional Part]?[Uncertainty Value][Direction Token][Exponent Token]`
+
+* **`[Sign]` (Optional):** Explicit positive (`+`) or negative (`-`) indicator for the nominal value.
+* **`[Integer Part].[Fractional Part]` (Mandatory):** The nominal value written as a standard decimal number.
+* **`?` (Mandatory Separator):** Flags the transition from the nominal value to the uncertainty parameters.
+* **`[Uncertainty Value]` (Mandatory):** An integer that aligns directly with the least significant digit (the very last digit) of the fractional part to define the magnitude of the error.
+* **`[Direction Token]` (Mandatory):** A single character defining the one-sided boundary:
+  * `u` (Up): The nominal value is the absolute floor. True value is in the range [Nominal, Nominal + Uncertainty].
+  * `d` (Down): The nominal value is the absolute ceiling. True value is in the range [Nominal - Uncertainty, Nominal].
+* **`[Exponent Token]` (Optional):** Expressed as `e` or `E` followed by an integer, representing a scientific notation multiplier (10^exponent).
+
+```python
+# Upward uncertainty: Base 1.23, error magnitude 4 at the hundredths place (+0.04)
 # Evaluates to bound: [1.23, 1.27]
 experiment_up = Interval("1.23?4u")
 
 # Downward uncertainty with exponents: Base -0.005, error magnitude 2 at the thousandths place (-0.002), scaled by 10^3
 # Evaluates to bound: [-7.0, -5.0]
 experiment_scaled = Interval("-0.005?2dE3")
-4. DecoratedInterval InitializationDecorated intervals pair an existing mathematical Interval object with a decoration (or flavor). Decorations provide metadata about the evaluation history of the interval (e.g., whether a function evaluation remained continuous across the domain, or if an out-of-bounds operation occurred).Unlike standard intervals, a DecoratedInterval is instantiated by passing an actual Interval instance along with its tracking state, rather than raw numbers.The standard IEEE 1788.1-2017 decoration states (ordered from highest validity to lowest) are:com (Comly): Entirely continuous, bounded, and well-defined.dac (Defined and Continuous): Bounded and continuous, but may have hit a domain boundary.def (Defined): Well-defined, but continuity may have been violated.trt (Trivial): No information or constraints guaranteed (the ultimate fallback/error state).Pythonfrom decoint import Interval, DecoratedInterval, Decoration
+```
+
+---
+
+## 4. `DecoratedInterval` Initialization
+
+Decorated intervals pair an existing mathematical `Interval` object with a **decoration** (or flavor). Decorations provide metadata about the evaluation history of the interval (e.g., whether a function evaluation remained continuous across the domain, or if an out-of-bounds operation occurred).
+
+Unlike standard intervals, a `DecoratedInterval` is instantiated by passing an actual **`Interval` instance** along with its tracking state, rather than raw numbers.
+
+The standard IEEE 1788.1-2017 decoration states (ordered from highest validity to lowest) are:
+* `com` (Comly): Entirely continuous, bounded, and well-defined.
+* `dac` (Defined and Continuous): Bounded and continuous, but may have hit a domain boundary.
+* `def` (Defined): Well-defined, but continuity may have been violated.
+* `trt` (Trivial): No information or constraints guaranteed (the ultimate fallback/error state).
+
+```python
+from decoint import Interval, DecoratedInterval, Decoration
 
 # 1. Instantiate the underlying mathematical interval
 base_interval = Interval("[2.1, 3.1]")
@@ -46,4 +120,6 @@ di1 = DecoratedInterval(base_interval)
 
 # Explicitly defining a decorated interval with a specific compliance status
 di2 = DecoratedInterval(base_interval, decoration=Decoration.DAC)
-If an operation encounters an undefined region or an evaluation exception, the resulting interval's decoration automatically drops to track the violation (e.g., dividing by an interval containing zero will cause the resulting DecoratedInterval to drop its status down to Decoration.TRT).Quick Summary: When to Use Which?Use Interval for low-overhead bounding calculations where tracking mathematical domain violations via flags isn't required.Use DecoratedInterval when you need strict compliance for complex systems where tracking continuity and domain exceptions is mandatory for proof verification.
+```
+
+If an operation encounters an undefined region or an evaluation exception, the resulting interval's decoration automatically drops to track the violation (e.g., dividing by an interval containing zero will cause the resulting `DecoratedInterval` to drop its status down to `Decoration.TRT`).
