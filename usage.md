@@ -355,4 +355,37 @@ disjoint_hull = i1.hull(i3)
 
 ---
 
+## 12. Unary Boolean Properties
+
+`decoint` exposes a collection of state-interrogation tools as Python **properties**. These allow you to efficiently inspect the geometric and mathematical configuration of an interval without triggering execution overhead.
+
+Because these components are implemented as properties rather than standard instance methods, **do not append trailing parentheses `()` when calling them.**
+
+### Supported Boolean Properties
+* **`is_empty`:** Returns `True` if the interval represents an empty set containing no real numbers.
+* **`is_singleton`:** Returns `True` if the interval represents a singular exact value (a point interval where the lower bound equals the upper bound).
+* **`is_bounded`:** Returns `True` if both the lower and upper bounds are finite real values (i.e., neither bound is infinity).
+* **`is_entire`:** Returns `True` if the interval spans the entire mathematical real line from negative infinity to positive infinity.
+* **`is_common`:** Returns `True` if the interval is both completely bounded and non-empty (representing a standard, standard-compliant bounded subset).
+
+```python
+from decoint import Interval
+
+# Define various interval structures
+i_standard  = Interval(1, 2)
+i_point     = Interval("4.5")
+i_inf       = Interval("-inf", "inf")
+
+# Querying properties (Note the omission of parentheses)
+print(i_standard.is_empty)     # Evaluates to False
+print(i_standard.is_bounded)   # Evaluates to True
+print(i_standard.is_common)    # Evaluates to True
+
+# Geometrically isolated checks
+print(i_point.is_singleton)    # Evaluates to True
+print(i_inf.is_entire)         # Evaluates to True
+```
+
+---
+
 
