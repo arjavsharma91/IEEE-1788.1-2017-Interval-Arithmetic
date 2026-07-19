@@ -234,3 +234,35 @@ nat_log   = log(Interval(1, 2))     # Natural logarithm (base e)
 base2_log = log2(Interval(2, 4))    # Base 2 logarithm -> [1.0, 2.0]
 base10_log= log10(Interval(10, 100))# Base 10 logarithm -> [1.0, 2.0]
 ```
+
+---
+
+## 8. Trigonometric Operations
+
+Trigonometric mappings require careful boundary calculations due to periodic extrema (like the peaks and troughs of sine and cosine) and asymptotic domain gaps (like the poles of tangent). `decoint` natively accounts for these internal critical points, ensuring outer-bound preservation across complete intervals.
+
+With the exception of the binary `atan2` operator, all trigonometric methods are **unary operators** accepting a single `Interval` or `DecoratedInterval`.
+
+### Supported Trigonometric Functions
+* **Standard Trig:** `sin`, `cos`, `tan`
+* **Inverse Trig:** `asin`, `acos`, `atan`
+* **Binary Inverse Tangent:** `atan2`
+
+```python
+from decoint import Interval, sin, cos, tan, asin, acos, atan, atan2
+
+# Standard Trigonometric Functions (Arguments in Radians)
+# Handles internal extrema safely (e.g., crossing pi/2 wraps perfectly to 1.0)
+sin_res = sin(Interval(0, 2))
+cos_res = cos(Interval(0, 3.14159))
+tan_res = tan(Interval("-1.0", "1.0"))
+
+# Inverse Trigonometric Functions
+asin_res = asin(Interval("-0.5", "0.5"))
+acos_res = acos(Interval(0, 1))
+atan_res = atan(Interval(-1, 1))
+
+# Binary Inverse Tangent (atan2)
+# Accepts two intervals representing the y and x coordinates respectively
+atan2_res = atan2(Interval(1, 2), Interval(3, 4))
+```
