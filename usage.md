@@ -388,4 +388,49 @@ print(i_inf.is_entire)         # Evaluates to True
 
 ---
 
+## Numeric and Geometric Properties
+
+In addition to boolean checks, `decoint` exposes regular unary properties that yield exact quantitative descriptions of an interval's topology and bounds. These are engineered as standard Python **properties** that return numeric values directly.
+
+Like the boolean properties, these are zero-argument indicators. **Do not use parentheses `()` when querying them.**
+
+### Supported Quantitative Properties
+
+* **`inf` (Infimum):** Exposes the exact lower bound of the interval set.
+* **`sup` (Supremum):** Exposes the exact upper bound of the interval set.
+* **`width`:** The total distance spanned by the interval bounds (`sup - inf`). Returns infinity for unbounded sets.
+* **`radius`:** Half of the interval's total width (`width / 2`).
+* **`midpoint`:** The exact geographical center point of the interval set (`(inf + sup) / 2`).
+* **`magnitude`:** The maximum absolute value mapped within the interval set. Mathematically defined as `max(|inf|, |sup|)`.
+* **`mignitude`:** The minimum absolute value mapped within the interval set. Returns `0` if the interval encloses zero; otherwise, evaluates to `min(|inf|, |sup|)`.
+
+### Code Example
+
+```python
+from decoint import Interval
+
+# Instantiate a non-symmetric interval spanning across zero
+i = Interval(-2, 4)
+
+# Basic bound retrieval
+print(i.inf)        # Evaluates to -2
+print(i.sup)        # Evaluates to 4
+
+# Geometric proportions
+print(i.width)      # Evaluates to 6
+print(i.radius)     # Evaluates to 3
+print(i.midpoint)   # Evaluates to 1
+
+# Absolute limits (Magnitude vs Mignitude)
+print(i.magnitude)  # Evaluates to 4 (since |-2| is less than |4|)
+print(i.mignitude)  # Evaluates to 0 (since the interval crosses zero)
+
+# Mignitude on an interval strictly isolated from zero
+i_positive = Interval(2, 5)
+print(i_positive.mignitude)  # Evaluates to 2
+```
+
+---
+
+
 
