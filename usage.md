@@ -467,6 +467,74 @@ max_res = interval_max(i1, i2)
 
 ---
 
+Markdown
+## Set Relations and Comparisons
+
+Intervals can be evaluated topologically and geometrically to determine how they nest, overlap, or position themselves relative to one another on the real number line. In `decoint`, these relations are exposed primarily as instance methods returning boolean values, with standard relational operators overloaded for intuitive comparison syntax.
+
+### 1. Inclusion and Overlap Relations
+
+These methods allow you to test for subset conditions, containment, and intersections between intervals or point values.
+
+* **`subset(other)`**: Returns `True` if every element of the current interval is contained within the `other` interval.
+* **`proper_subset(other)`**: Returns `True` if the current interval is a subset of `other`, but the two intervals are not identical.
+* **`contains(x)`**: Unlike other relational methods, this checks element membership and accepts a **single numeric value** (integer, float, or `gmpy2` type) rather than an interval. It returns `True` if $x$ lies within the interval's bounds.
+* **`interior(other)`**: Returns `True` if the current interval lies strictly inside the interior of `other` (meaning the bounds of the current interval do not touch the boundaries of `other`).
+* **`overlaps(other)`**: Returns `True` if the two intervals share at least one common real number (a non-empty intersection).
+* **`disjoint(other)`**: Returns `True` if there is absolutely no overlap between the two intervals (their intersection is completely empty).
+
+### 2. Positional and Ordering Relations
+
+These methods evaluate the strict directional ordering of two intervals across the real line.
+
+* **`precedes(other)`**: Returns `True` if the current interval is completely to the left of `other`, or at most touches its lower bound.
+* **`meets(other)`**: Returns `True` if the upper bound of the current interval exactly matches the lower bound of `other` without any overlapping interior.
+* **`strictly_less_than(other)`**: Returns `True` if every element in the current interval is strictly less than every element in `other` (there is a visible gap between them).
+* **`strictly_greater_than(other)`**: Returns `True` if every element in the current interval is strictly greater than every element in `other`.
+
+### 3. Operator-Based Comparisons
+
+For standard element-wise interval inequalities, `decoint` overloads Python's built-in comparison operators. These follow certain-order relational logic where the condition must hold true across all possible variations within the sets.
+
+* **Less Than (`<`)**: Evaluates if the current interval is strictly to the left of another interval.
+* **Greater Than (`>`)**: Evaluates if the current interval is strictly to the right of another interval.
+
+### Code Example
+
+```python
+from decoint import Interval
+
+# Define a baseline set of intervals for comparison
+i1 = Interval(1, 3)
+i2 = Interval(2, 5)
+i3 = Interval(1, 3)
+i4 = Interval(5, 7)
+
+# 1. Inclusion and Overlap Tests
+print(i1.subset(i2))           # Evaluates to False
+print(Interval(2, 3).subset(i1)) # Evaluates to True
+print(i1.proper_subset(i3))    # Evaluates to False (they are equal)
+print(i1.overlaps(i2))         # Evaluates to True (overlap on [2, 3])
+print(i1.disjoint(i4))         # Evaluates to True
+
+# Element containment check (takes a scalar number)
+print(i1.contains(2.5))        # Evaluates to True
+print(i1.contains(4))          # Evaluates to False
+
+# 2. Positional and Ordering Tests
+print(i1.precedes(i4))         # Evaluates to True
+print(i1.meets(i2))            # Evaluates to False
+print(i1.meets(i4))            # Evaluates to False (gap between 3 and 5)
+print(i1.strictly_less_than(i4)) # Evaluates to True
+
+# 3. Operator-Based Inequalities
+print(i1 < i4)                 # Evaluates to True
+print(i4 > i2)                 # Evaluates to True
+```
+---
+
+
+
 
 
 
