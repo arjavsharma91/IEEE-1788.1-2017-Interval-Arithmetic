@@ -322,3 +322,37 @@ ceil_res  = interval_ceil(Interval("-1.7", "2.3"))  # Rounds upward -> [-1, 3]
 ```
 
 ---
+
+## 11. Set Operations
+
+`decoint` treats intervals geometrically as connected sets of real numbers. To resolve operations between multiple intervals, the engine exposes `intersection` and `hull` transformations. Unlike transcendental or power functions, these are structured as **instance methods** called directly on an initial interval object.
+
+These methods accept another `Interval` or `DecoratedInterval` instance as their argument.
+
+### Supported Set Methods
+* **`intersection(other)`:** Returns the tightly bound segment where both intervals overlap. If no geometric overlap exists, it evaluates safely to an empty set representation (`EmptySet` / `NAI`).
+* **`hull(other)`:** Returns the interval hull—the absolute smallest, continuous interval that entirely encloses both distinct sets, bridging any gaps between them.
+
+```python
+from decoint import Interval
+
+i1 = Interval(1, 3)
+i2 = Interval(2, 5)
+i3 = Interval(6, 8)
+
+# Intersection: Resolves the shared overlapping mathematical region
+# Evaluates to [2, 3]
+intersection_res = i1.intersection(i2)
+
+# Hull: Spans the total domain from the lowest minimum to the highest maximum
+# Evaluates to [1, 5]
+hull_res = i1.hull(i2)
+
+# Hull across disjoint sets: Safely bridges the gap between disconnected intervals
+# Evaluates to [1, 8]
+disjoint_hull = i1.hull(i3)
+```
+
+---
+
+
