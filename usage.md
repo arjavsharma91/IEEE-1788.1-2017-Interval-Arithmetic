@@ -432,5 +432,41 @@ print(i_positive.mignitude)  # Evaluates to 2
 
 ---
 
+## Lattice Operations
+
+Intervals form a bounded lattice under the standard coordinate-wise product order. To compute the lattice infimum and supremum between two intervals, `decoint` exposes the `interval_min` and `interval_max` binary functions. 
+
+These operations are structurally distinct from standard set operations (like intersection or hull) because they compute the minimum or maximum of the respective upper and lower bounds directly, rather than treating the intervals as point sets.
+
+### Supported Lattice Functions
+
+* **`interval_min(x, y)`:** Computes the lower bound as the minimum of the two lower bounds, and the upper bound as the minimum of the two upper bounds: `[min(x.inf, y.inf), min(x.sup, y.sup)]`.
+* **`interval_max(x, y)`:** Computes the lower bound as the maximum of the two lower bounds, and the upper bound as the maximum of the two upper bounds: `[max(x.inf, y.inf), max(x.sup, y.sup)]`.
+
+### Code Example
+
+```python
+from decoint import Interval, interval_min, interval_max
+
+# Define two overlapping, staggered intervals
+i1 = Interval(1, 5)
+i2 = Interval(3, 4)
+
+# Lattice Minimum (Infimum)
+# Lower bound: min(1, 3) = 1
+# Upper bound: min(5, 4) = 4
+# Evaluates to [1, 4]
+min_res = interval_min(i1, i2)
+
+# Lattice Maximum (Supremum)
+# Lower bound: max(1, 3) = 3
+# Upper bound: max(5, 4) = 5
+# Evaluates to [3, 5]
+max_res = interval_max(i1, i2)
+```
+
+---
+
+
 
 
