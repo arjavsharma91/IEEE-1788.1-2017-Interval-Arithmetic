@@ -295,3 +295,30 @@ atanh_res = atanh(Interval("-0.5", "0.5")) # Domain restricted to (-1, 1)
 ```
 
 ---
+
+## 10. Special Primitives
+
+`decoint` provides structural primitives for absolute scaling, sign determination, and interval boundary truncation. These primitives ensure that discrete and non-continuous transformations (like floor or ceiling limits) preserve set boundaries correctly according to standard interval arithmetic logic.
+
+All primitive functions in this section are **unary operators** that accept a single `Interval` or `DecoratedInterval` instance.
+
+### Supported Special Primitives
+* **Magnitude and Sign:** `abs`, `sign`
+* **Discrete Rounding:** `interval_trunc`, `interval_floor`, `interval_ceil`
+
+```python
+from decoint import Interval, abs, sign, interval_trunc, interval_floor, interval_ceil
+
+# Absolute Value and Sign Determination
+# abs handles intervals containing zero by fixing the lower bound to 0
+abs_res  = abs(Interval(-2, 3))               # Evaluates to [0, 3]
+sign_res = sign(Interval(-5, 2))              # Evaluates to [-1, 1]
+
+# Discrete Rounding Primitives
+# These map intervals cleanly onto integer-bounded sets
+trunc_res = interval_trunc(Interval("-1.7", "2.3")) # Truncates toward zero -> [-1, 2]
+floor_res = interval_floor(Interval("-1.7", "2.3")) # Rounds downward -> [-2, 2]
+ceil_res  = interval_ceil(Interval("-1.7", "2.3"))  # Rounds upward -> [-1, 3]
+```
+
+---
