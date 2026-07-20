@@ -1,3 +1,23 @@
+---
+title: 'decoint: An IEEE 1788.1-2017 Compliant Interval Arithmetic Library for Python Using gmpy2'
+tags:
+  - Python
+  - interval arithmetic
+  - validated numerics
+  - IEEE 1788
+  - gmpy2
+authors:
+  - name: Arjav Sharma
+    orcid: 0009-0001-6347-732X
+    affiliation: 1
+affiliations:
+  - name: Independent Researcher
+    index: 1
+date: July 2026
+bibliography: paper.bib
+---
+
+# Summary
 `decoint` is an open-source Python library that implements rigorous, standard-compliant interval arithmetic according to the IEEE 1788.1-2017 standard for Simplified Interval Arithmetic. Developed to address the inherent unreliability of standard binary floating-point representations in critical applications, the library provides a robust framework for executing mathematical operations while explicitly bounding rounding and truncation errors. 
 
 To guarantee strict containment bounds, `decoint` utilizes the arbitrary-precision capabilities of the `gmpy2` library, dynamically manipulating its underlying GNU MPFR rounding contexts during execution. A core strength of `decoint` is its comprehensive implementation of the IEEE 1788 decoration system—supporting `com` (common), `dac` (defined and continuous), `def` (defined), `trv` (trivial), and `ill` (ill-conditioned) states. This system tracks the mathematical validity and continuity of functions across intervals, preventing silent information loss during complex, multi-stage function evaluations. Ultimately, `decoint` offers an intuitive, pure-Python interface that brings low-level numerical rigor and error-bounding guarantees directly to the modern scientific Python ecosystem.
@@ -16,6 +36,10 @@ The ecosystem for interval computation varies significantly across modern progra
 
 Existing Python frameworks generally fall short of modern standards. Legacy packages like `pyinterval` provide basic interval representations but are no longer actively maintained and lack structural alignment with the unified specifications outlined in the modern IEEE 1788 framework. More recent libraries, such as `IntvalPy`, focus heavily on specialized interval linear systems, visualization, and classical or Kaucher interval arithmetic; however, they do not implement the complete IEEE 1788.1-2017 decoration subsystem. Without automated, exception-free decoration propagation (`com`, `dac`, `def`, `trv`, `ill`), these tools cannot dynamically monitor mathematical continuity or domain validity across multi-stage function evaluations. This leaves Python researchers without an accessible, out-of-the-box option that delivers both hardware-enforced numeric containment and rigorous execution-state tracking. `decoint` explicitly fills this gap, providing a streamlined, standard-aligned interface designed to meet the demands of modern computational science.
 
+# Software Architecture and Implementation
+
+`decoint` employs a decoupled, multi-layered object architecture designed to cleanly separate rigorous numeric containment from execution-state metadata tracking. The codebase exposes two primary user-facing classes: `Interval`, which handles the mathematical infimum and supremum bounds, and `DecoratedInterval`, a composite class that wraps an underlying `Interval` instance alongside a corresponding IEEE 1788 decoration object.
+
 The underlying computational pipeline operates through a strict three-tier hierarchy:
 
 1. **The Rounding Layer:** At the lowest level, the library abstracts directed rounding through specialized, decoupled primitive operations (e.g., `sin_up` and `sin_down`). Each primitive explicitly configures a local, isolated `gmpy2` context, modifying the underlying GNU MPFR rounding flags to guarantee directed truncation towards positive or negative infinity respectively, without altering the user's global runtime environment.
@@ -33,3 +57,5 @@ Generative artificial intelligence tools were utilized during the development of
 # Acknowledgements
 
 The author acknowledges the IEEE 1788 working group for establishing the foundational software and specifications that enabled this project.
+
+# References
